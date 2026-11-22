@@ -9,8 +9,9 @@ export class RoomScene extends Phaser.Scene {
   preload(){
     const prefix=import.meta.env.BASE_URL+'assets/';
     for(const key of ['bedroom','living','kitchen'])this.load.image(`room-${key}`,`${prefix}rooms/${key}.png`);
-    for(const key of ['lamp','book','backpack','jacket','shoes','phone','pillow','cup','apple','kettle','plate','spoon','towel','remote','plant','keys','trash','picture','ball'])
-      this.load.image(`obj-${key}`,`${prefix}objects/${key}.png`);
+    // All props use AI-rendered transparent raster images instead of flat SVG illustrations.
+    for(const key of ['lamp','book','backpack','jacket','shoes','phone','pillow','cup','apple','kettle','plate','spoon','towel','remote','plant','keys','trash','picture','ball','mirror'])
+      this.load.image(`obj-${key}`,`${prefix}objects/${key}.webp`);
     for(const key of ['idle','walk1','walk2','crouch','reach','grab','sit','hold','use'])
       this.load.image(`hero-${key}`,`${prefix}hero/${key}.png`);
     this.controller.avatarFactory?.queueTextures(this.load,this.controller.avatar);
@@ -82,8 +83,7 @@ export class RoomScene extends Phaser.Scene {
   }
   drawStations(){
     if(this.roomId!=='bedroom')return;
-    // Keep the art illustrated: no flat vector mirror or frame overlays.
-    const label=this.add.text(950,280,'MIRROR · ESPEJO',{
+    const label=this.add.text(950,287,'MIRROR · ESPEJO',{
       fontFamily:'Arial',fontSize:'16px',fontStyle:'bold',
       color:'#fff0d1',backgroundColor:'#232b40dd',
       padding:{x:10,y:7}

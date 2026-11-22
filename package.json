@@ -8,7 +8,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build --base=./",
     "preview": "vite preview --host 0.0.0.0",
-    "validate": "node tools/validate.mjs && node tools/validate-avatar.mjs",
+    "validate": "node tools/validate.mjs && node tools/validate-avatar.mjs && node tools/validate-art.mjs",
     "assets": "python tools/generate_assets.py"
   },
   "dependencies": {

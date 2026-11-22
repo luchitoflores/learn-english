@@ -14,14 +14,14 @@ export const ROOMS = {
     id:'bedroom', name:'Dormitorio', en:'Bedroom', subtitle:'Despierta, vístete y explora.',
     background:'bedroom', exits:[{to:'living',x:1225,y:450,label:'Sala'}],
     objects:[
-      O('mirror','picture','mirror','espejo',954,455,125,[
+      O('mirror','mirror','mirror','espejo',954,455,125,[
         ['brush_teeth','Brush your teeth.','Cepíllate los dientes.','A1'],
         ['shave_face','Shave your beard.','Rasúrate la barba.','A2'],
         ['smile_face','Smile at the mirror.','Sonríe frente al espejo.','A1'],
         ['cry_face','Cry.','Llora.','A1'],
         ['blink_eyes','Blink your eyes.','Parpadea.','A2'],
         ['shout_face','Shout!','¡Grita!','A1']
-      ],{},true),
+      ]),
       O('bed','pillow','bed','cama',255,496,130,[
         ['wake_up','Wake up!','¡Despierta!','A1'],['get_up','Get up from bed.','Levántate de la cama.','A1'],
         ['lie_down','Lie down on the bed.','Acuéstate en la cama.','A1'],

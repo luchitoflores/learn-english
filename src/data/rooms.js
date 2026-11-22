@@ -22,12 +22,6 @@ export const ROOMS = {
         ['blink_eyes','Blink your eyes.','Parpadea.','A2'],
         ['shout_face','Shout!','¡Grita!','A1']
       ],{},true),
-      O('wardrobe','jacket','wardrobe','ropero',1175,530,145,[
-        ['put_on_shirt','Put on your shirt.','Ponte la camisa.','A1'],
-        ['put_on_suit','Put on your suit.','Ponte el traje.','A2'],
-        ['take_off_shirt','Take off your shirt.','Quítate la camisa.','A1'],
-        ['put_on_pajamas','Put on your pajamas.','Ponte el pijama.','A1']
-      ],{},true),
       O('bed','pillow','bed','cama',255,496,130,[
         ['wake_up','Wake up!','¡Despierta!','A1'],['get_up','Get up from bed.','Levántate de la cama.','A1'],
         ['lie_down','Lie down on the bed.','Acuéstate en la cama.','A1'],
@@ -75,7 +69,11 @@ export const ROOMS = {
       O('wardrobe','jacket','wardrobe','armario',1177,558,100,[
         ['open_up','Open up the wardrobe.','Abre el armario.','A2'],
         ['close','Close the wardrobe.','Cierra el armario.','A1'],
-        ['look_for','Look for your clothes.','Busca tu ropa.','A2']],{},true)
+        ['look_for','Look for your clothes.','Busca tu ropa.','A2'],
+        ['put_on_shirt','Put on your shirt.','Ponte la camisa.','A1'],
+        ['put_on_suit','Put on your suit.','Ponte el traje.','A2'],
+        ['take_off_shirt','Take off your shirt.','Quítate la camisa.','A1'],
+        ['put_on_pajamas','Put on your pajamas.','Ponte el pijama.','A1']],{},true)
     ]
   },
   kitchen: {

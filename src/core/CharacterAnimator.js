@@ -37,7 +37,9 @@ export class CharacterAnimator {
   setPose(pose) {
     if (this.disposed || !this.sprite?.active) return;
     this.sprite.stop();
-    this.sprite.setTexture(this.keyFor(pose));
+    const key=this.keyFor(pose);
+    if(this.scene.textures.exists(key))this.sprite.setTexture(key);
+    this.sprite.setAngle(pose==='reach'?-7:pose==='use'?6:pose==='crouch'?2:0);
   }
   walk() {
     if (this.disposed || !this.sprite?.active) return;

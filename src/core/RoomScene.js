@@ -27,11 +27,11 @@ export class RoomScene extends Phaser.Scene {
     this.stationArt=[];this.drawStations();
     const startX=this.controller.entryX ?? (this.roomId==='bedroom'?513:640);
     this.controller.entryX=null;
-    const avatarKey=this.controller.avatarFactory
-      ?this.controller.avatarFactory.profileKey(this.controller.avatar,'idle'):'hero-idle';
+    const desiredKey=this.controller.avatarFactory?.profileKey(this.controller.avatar)||'hero-idle';
+    const avatarKey=this.textures.exists(desiredKey)?desiredKey:'hero-idle';
     this.hero=this.add.sprite(startX,631,avatarKey).setOrigin(.5,1)
-      .setDisplaySize(this.controller.avatarFactory?136:126,this.controller.avatarFactory?202:160).setDepth(14);
-    this.hero.setInteractive(new Phaser.Geom.Rectangle(50,4,120,194),Phaser.Geom.Rectangle.Contains);
+      .setDisplaySize(avatarKey==='hero-idle'?126:95,avatarKey==='hero-idle'?160:205).setDepth(14);
+    this.hero.setInteractive({useHandCursor:true});
     this.hero.on('pointerdown',()=>this.controller.toast('Toca un objeto para descubrir acciones.'));
     this.character=new CharacterAnimator(this,this.hero,this.controller.makeAvatarProfile()||undefined);
     this.handSprite=this.add.image(startX+29,538,'obj-book').setDisplaySize(42,42).setDepth(16).setVisible(false);
@@ -82,20 +82,24 @@ export class RoomScene extends Phaser.Scene {
   }
   drawStations(){
     if(this.roomId!=='bedroom')return;
-    // The existing wardrobe is at the right; mirror is positioned above the desk.
-    // Both get enlarged interaction hitboxes via passive room objects.
-    const frame=this.add.rectangle(950,372,124,144,0xd3b992,.65).setStrokeStyle(8,0xe8c69d,.92).setDepth(3);
-    const glass=this.add.rectangle(950,372,105,126,0x9bbccd,.5).setDepth(4);
-    const reflection=this.add.triangle(935,346,0,89,36,0,52,0,0xdaf1ef,.25).setDepth(5);
-    const label=this.add.text(950,284,'ESPEJO / MIRROR',{
-      fontFamily:'Arial',fontSize:'15px',fontStyle:'bold',color:'#fff3d6',
-      backgroundColor:'#22283edf',padding:{x:8,y:6}}).setOrigin(.5).setDepth(20);
-    this.stationArt.push(frame,glass,reflection,label);
+    // Keep the art illustrated: no flat vector mirror or frame overlays.
+    const label=this.add.text(950,280,'MIRROR · ESPEJO',{
+      fontFamily:'Arial',fontSize:'16px',fontStyle:'bold',
+      color:'#fff0d1',backgroundColor:'#232b40dd',
+      padding:{x:10,y:7}
+    }).setOrigin(.5).setDepth(20);
+    label.setInteractive({useHandCursor:true}).on('pointerdown',()=>{
+      const mirror=this.room.objects.find(o=>o.id==='mirror');
+      if(mirror)this.controller.selectObject(mirror);
+    });
+    this.stationArt.push(label);
   }
   refreshAvatar(){
     if(!this.hero?.active||!this.controller.avatarFactory)return;
+    const key=this.controller.avatarFactory.profileKey(this.controller.avatar);
+    if(!this.textures.exists(key))return;
     this.character.setSkin(this.controller.makeAvatarProfile());
-    this.hero.setDisplaySize(136,202);
+    this.hero.setDisplaySize(95,205);
     this.character.rest(this.room.objects.some(o=>o.state.held));
     this.updateHand();
   }
@@ -240,15 +244,14 @@ export class RoomScene extends Phaser.Scene {
     this.character.rest(this.room.objects.some(o=>o.state.held));this.updateHand();
     const facial={shave_face:'shave',brush_teeth:'brush',smile_face:'smile',
       cry_face:'cry',blink_eyes:'blink',shout_face:'shout'}[phrase.action];
-    if(facial&&this.controller.avatarFactory){
-      const key=this.controller.avatarFactory.expressionKey(this.controller.avatar,facial);
-      if(this.textures.exists(key)){
-        this.hero.setTexture(key);
-        this.time.delayedCall(1100,()=>{
-          if(this.sys.isActive()&&this.hero?.active)
-            this.character.rest(this.room.objects.some(o=>o.state.held));
-        });
-      }
+    // Facial states need real PNG expressions; never switch to missing textures.
+    // Shaving and clothing are implemented as persistent raster variant changes.
+    if(facial && this.hero?.active){
+      const originalAngle=this.hero.angle;
+      this.hero.setAngle(facial==='cry'?-4:facial==='shout'?5:0);
+      this.time.delayedCall(500,()=>{
+        if(this.sys.isActive()&&this.hero?.active)this.hero.setAngle(originalAngle);
+      });
     }
     this.busy=false;
     return true;
@@ -257,6 +260,10 @@ export class RoomScene extends Phaser.Scene {
   async executeAction(obj,phrase){return this.animateAction(obj,phrase,{preview:false})}
   update(_time,delta){
     if(!this.hero)return;
+    // Gentle body tilt makes the raster character respond to movement
+    // until we have individually animated limb assets.
+    if(this.hero.anims.isPlaying)this.hero.setAngle(Math.sin(_time*.013)*2);
+    else if(!this.busy)this.hero.setAngle(0);
     this.followCharacter();
     if(this.busy||this.isLeaving||this.controller.editorActive)return;
     const left=this.keys.A.isDown||this.keys.LEFT.isDown||this.controller.movement<0;

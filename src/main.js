@@ -23,9 +23,9 @@ class GameApp {
   }
   get room(){return this.getRoom(this.roomId)}
   getRoom(id){if(!this.cache[id])this.cache[id]=cloneRoom(id,this.custom);return this.cache[id]}
-  async setupPhaser(){
-    try{this.avatarFactory=await AvatarFactory.load(import.meta.env.BASE_URL)}
-    catch(error){console.warn('Avatar artwork unavailable; using fallback',error);this.avatarFactory=null}
+  setupPhaser(){
+    // Construct the game synchronously; no blocking SVG downloads or texture generation.
+    this.avatarFactory=AvatarFactory.load(import.meta.env.BASE_URL);
     const viewport=$('game');
     this.game=new Phaser.Game({
       type:Phaser.AUTO,parent:'game',backgroundColor:'#282b44',

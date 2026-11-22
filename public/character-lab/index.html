@@ -1,417 +1,60 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#171d32">
-<title>Word Quest · Estudio de avatares y acciones</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Word Quest · Personaje</title>
 <style>
-*{box-sizing:border-box}
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff4e5;background:#131a2b;--skin:#e6b484;--skin-shadow:#bb805e;--hair:#8a8e99;--beard:#707883;--shirt:#a65749;--shirt-shadow:#783d3d;--pants:#465f8d;--shoes:#302c42}
-body{margin:0;background:radial-gradient(circle at 20% 10%,#3b3b5d 0%,#1a2138 58%,#131a2b 100%);min-height:100dvh}
-header{max-width:1020px;margin:auto;padding:19px 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:14px}
-h1{font-size:clamp(20px,4vw,28px);line-height:1.15;margin:0}
-header span{font-size:12px;color:#e5c2a0;letter-spacing:1.5px;font-weight:800}
-a{color:#f0c992;text-decoration:none}
-main{max-width:1020px;margin:auto;padding:12px 16px 50px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(270px,.9fr);gap:16px}
-.card{border:1px solid #eed1a733;background:#252c43d6;border-radius:20px;padding:16px;box-shadow:0 18px 50px #090c1d55}
-.stage{background:radial-gradient(ellipse at 50% 48%,#766e8c 0%,#48495f 52%,#292f44 100%);min-height:420px;border-radius:16px;position:relative;overflow:hidden;display:grid;place-items:center}
-.stage::after{content:"PROTOTIPO MODULAR · 100 % ORIGINAL";position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:1.5px;color:#ffebd2cc;font-weight:800;pointer-events:none}
-.stage svg{width:min(100%,400px);height:auto;max-height:470px;overflow:visible}
-.info{margin:13px 4px 1px}
-.info strong{font-size:21px;display:block;color:#ffe1aa}
-.info span{font-size:15px;color:#c3ccdd;display:block;margin-top:5px}
-h2{font-size:18px;margin:0 0 12px}
-fieldset{padding:0;margin:0 0 17px;border:0}
-legend{font-size:12px;letter-spacing:1.3px;font-weight:800;color:#efd0a1;margin-bottom:9px}
-.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-button,select{font:inherit}
-.actions button{min-height:60px;color:#fff1df;background:#353c58;border:1px solid #bca9a455;border-radius:12px;padding:8px 4px;font-weight:700;font-size:12px}
-.actions button.active{background:#83657f;border-color:#f0d1b8}
-.actions button:focus-visible,select:focus-visible{outline:2px solid #f5cb8d;outline-offset:2px}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.controls label{font-size:12px;color:#cbd2df;display:grid;gap:5px}
-.controls select{width:100%;min-height:41px;border:1px solid #8e95ac;background:#1c253b;color:#fff1e4;border-radius:9px;padding:7px}
-.grammar{padding:11px 13px;margin-top:10px;border-radius:12px;background:#151d34;border:1px solid #c9a37a55;font-size:14px;line-height:1.5;color:#f8ddb4}.grammar b{color:#fff1d9}.note{font-size:12px;line-height:1.6;color:#c3c8d7;margin-top:13px;border-top:1px solid #ffffff26;padding-top:13px}
-footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:12px}
-#char{transform-origin:210px 350px;transform:scale(1.035)}
-.stage.bare #armNormal path:first-child,.stage.bare #armBack path:nth-child(2),.stage.bare #armWorking path:first-child{stroke:var(--skin) !important}
-.stage .grammar{font-size:12px}
-#legs g{transform-box:fill-box}
-.stage.walk #legFront{animation:front-step .55s ease-in-out infinite alternate}
-.stage.walk #legBack{animation:back-step .55s ease-in-out infinite alternate}
-.stage.wave #armNormal{animation:arm-wave .5s ease-in-out infinite alternate;transform-origin:266px 238px}
-.stage.cry #char{animation:tremble .2s ease-in-out infinite alternate}
-.stage.brush #armWorking,.stage.shave #armWorking,.stage.makeup #armWorking{animation:care-motion .35s ease-in-out infinite alternate;transform-origin:262px 225px}
-.stage.nails #armWorking{animation:care-motion .4s ease-in-out infinite alternate;transform-origin:262px 225px}
-@keyframes front-step{from{transform:rotate(-13deg)}to{transform:rotate(14deg)}}
-@keyframes back-step{from{transform:rotate(15deg)}to{transform:rotate(-14deg)}}
-@keyframes arm-wave{from{transform:rotate(0deg)}to{transform:rotate(-33deg)}}
-@keyframes tremble{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
-@keyframes care-motion{from{transform:translateY(-4px)}to{transform:translateY(5px)}}
-@media(max-width:700px){main{grid-template-columns:1fr;gap:11px}.stage{min-height:355px}.stage svg{height:355px;max-width:100%}.card{padding:12px}.actions button{min-height:54px}}
-
-.lab-tools{display:flex;justify-content:flex-end;margin-top:12px}.lab-tools button{padding:10px 14px;border:1px solid #e7c28c;border-radius:10px;background:#76577a;color:#ffebd4;font-weight:800}.actions button[hidden]{display:none}
-#bareTorso{filter:drop-shadow(1px 2px 2px #3b243655)}
-#beard{transition:opacity .25s}
-.stage.shirt #shirtLayer,.stage.suit #suitLayer{animation:wear .5s ease-out}
-@keyframes wear{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+:root{font-family:system-ui,sans-serif;color:#fff2df;background:#171d31}*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at top,#39415d,#171d31 70%)}
+header{padding:18px 16px 10px;max-width:990px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}header small{font-size:11px;letter-spacing:1.5px;color:#e4be90;font-weight:800}h1{font-size:24px;margin:4px 0}header a{color:#f5d5ad;font-size:13px}main{max-width:990px;margin:auto;padding:10px 14px 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.9fr);gap:14px}.panel{background:#252d44;border-radius:19px;padding:16px;border:1px solid #e8c99b44}.portrait{border-radius:15px;background:radial-gradient(ellipse,#777889,#343d55 75%);min-height:380px;display:flex;align-items:flex-end;justify-content:center;padding:8px;overflow:hidden}.portrait img{height:350px;max-width:100%;width:auto;object-fit:contain;transform-origin:bottom center;filter:drop-shadow(0 18px 15px #19203895)}.portrait.acting img{animation:gesture .42s ease-in-out 2 alternate}@keyframes gesture{from{transform:rotate(-4deg) translateY(0)}to{transform:rotate(4deg) translateY(-7px)}}
+.caption{text-align:center;margin:12px 0 2px}.caption strong{font-size:24px;display:block}.caption p{margin:6px;color:#cbd0df}h2{font-size:17px;color:#f2d3a6;margin:3px 0 12px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:17px}button{font:inherit;background:#38425f;color:#fef1dc;border:1px solid #c9b19577;border-radius:11px;min-height:47px;font-size:13px;font-weight:700;padding:9px;touch-action:manipulation}button.active,button:hover{background:#755d7d;border-color:#f5d39e}.instructions{line-height:1.5;color:#cbd1dc;font-size:13px;margin-top:15px}#feedback{background:#171f34;border-radius:12px;padding:14px;margin-top:9px;min-height:72px}#feedback strong{font-size:19px;color:#ffe3b7;display:block}#feedback span{display:block;margin-top:4px}.note{font-size:12px;line-height:1.6;color:#afb9c8;margin-top:13px;border-top:1px solid #fff3;padding-top:10px}.back{color:#f4d4a5} .toolbar{display:flex;gap:9px;justify-content:space-between;margin-top:14px}.toolbar button{flex:1}
+@media(max-width:720px){main{grid-template-columns:1fr}.portrait{min-height:330px}.portrait img{height:305px}.panel{padding:13px}header h1{font-size:20px}}
 </style>
 </head>
 <body>
-<header><div><span>WORD QUEST · AVATAR STUDIO 0.2</span><h1>Editor de personaje y acciones</h1></div><a href="../">← Volver al juego</a></header>
+<header><div><small>WORD QUEST · CHARACTER STUDIO</small><h1>Personaje de Word Quest</h1></div><a href="../">Volver al juego</a></header>
 <main>
-<section class="card">
-  <div id="stage" class="stage">
-    <svg viewBox="0 0 420 470" role="img" aria-label="Personaje 2D ilustrado y articulado por capas">
-      <defs>
-        <linearGradient id="clothLight" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff" stop-opacity=".23"/><stop offset="1" stop-color="#000000" stop-opacity=".08"/></linearGradient>
-        <linearGradient id="hairLight" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".15"/><stop offset="1" stop-color="#000000" stop-opacity=".15"/></linearGradient>
-        <filter id="softShadow"><feGaussianBlur stdDeviation="6"/></filter>
-      </defs>
-      <ellipse cx="210" cy="435" rx="87" ry="13" fill="#101329" opacity=".42" filter="url(#softShadow)"/>
-      <g id="char" stroke-linejoin="round" stroke-linecap="round">
-        <!-- Back arm: independent visual part -->
-        <g id="armBack">
-          <path d="M163 237 Q137 265 143 324" stroke="#273c56" stroke-width="30" fill="none"/>
-          <path d="M163 237 Q137 265 143 324" stroke="var(--shirt-shadow)" stroke-width="26" fill="none"/>
-          <ellipse cx="143" cy="330" rx="16" ry="18" fill="var(--skin-shadow)" stroke="#634961" stroke-width="3"/>
-        </g>
-        <!-- Independently rotating legs -->
-        <g id="legs">
-          <g id="legBack" style="transform-origin:177px 333px">
-            <path d="M177 327 Q169 375 166 414" stroke="var(--pants)" stroke-width="37" fill="none"/>
-            <path d="M166 407 Q158 412 144 422 Q132 436 167 440 L199 435 L193 415Z" fill="var(--shoes)" stroke="#242535" stroke-width="3"/>
-            <path d="M146 427 L185 428" stroke="#a2a4ae" stroke-width="4"/>
-          </g>
-          <g id="legFront" style="transform-origin:233px 334px">
-            <path d="M231 327 Q241 378 234 415" stroke="var(--pants)" stroke-width="40" fill="none"/>
-            <path d="M234 405 L256 418 Q276 428 258 439 L215 439 Q206 428 219 413Z" fill="var(--shoes)" stroke="#242535" stroke-width="3"/>
-            <path d="M217 429 L260 429" stroke="#a2a4ae" stroke-width="4"/>
-          </g>
-        </g>
-        <!-- Torso and jacket are independent parts -->
-        <g id="torso">
-          <path id="bareTorso" d="M169 214 Q139 223 137 257 L145 324 Q201 344 272 323 L278 252 Q277 221 247 213Z" fill="var(--skin)" stroke="#785b5c" stroke-width="4"/>
-          <g id="shirtLayer"><path d="M169 214 Q139 223 137 257 L145 324 Q201 344 272 323 L278 252 Q277 221 247 213Z" fill="var(--shirt)" stroke="#3c4259" stroke-width="4"/>
-          <path d="M174 220 Q210 238 246 220 L257 314 Q201 329 160 313Z" fill="url(#clothLight)" opacity=".85"/>
-          <path d="M208 229 L210 318" stroke="#e1ecda" stroke-width="3" opacity=".5"/>
-          <circle cx="211" cy="263" r="3" fill="#dfe7e8"/><circle cx="211" cy="286" r="3" fill="#dfe7e8"/>
-          <path d="M157 318 Q204 332 265 317" stroke="#30495f" stroke-width="8" fill="none"/>
-          </g>
-          <g id="suitLayer" display="none">
-            <path d="M168 214 Q140 221 137 262 L148 329 Q199 344 267 329 L279 258 Q276 222 245 213Z" fill="#303b59" stroke="#24293d" stroke-width="4"/>
-            <path d="M186 220 L207 275 L232 219 L219 317 L201 335 L185 310Z" fill="#f8f3e9"/>
-            <path d="M185 217 L168 234 L193 286 L207 274Z M232 217 L251 236 L226 286 L207 274Z" fill="#526384" stroke="#202b48" stroke-width="2"/>
-            <path d="M207 226 L198 240 L208 250 L218 239Z L211 300 L202 303 L200 254Z" fill="#a6434b"/>
-            <circle cx="225" cy="307" r="3" fill="#d6b888"/>
-          </g>
-        </g>
-        <g id="neck"><path d="M182 200 L184 231 Q207 246 232 230 L231 194Z" fill="var(--skin-shadow)" stroke="#765c5b" stroke-width="3"/></g>
-        <!-- Head, hair and face can change without changing body -->
-        <g id="head">
-          <ellipse cx="210" cy="143" rx="69" ry="77" fill="var(--skin)" stroke="#624a56" stroke-width="4"/>
-          <path d="M147 163 Q150 203 176 212 M270 163 Q262 209 237 215" stroke="#bf856a" stroke-width="5" opacity=".35" fill="none"/>
-          <ellipse cx="146" cy="160" rx="13" ry="20" fill="var(--skin-shadow)" stroke="#624a56" stroke-width="3"/>
-          <path d="M190 201 Q211 215 235 201" stroke="#d0906b" stroke-width="3" fill="none" opacity=".6"/>
-          <g id="hairShort">
-            <path d="M147 147 Q131 80 174 65 Q214 40 254 70 Q283 88 272 143 L259 110 Q249 90 238 90 Q210 112 188 96 Q169 125 147 119Z" fill="var(--hair)" stroke="#392c40" stroke-width="4"/>
-            <path d="M151 100 Q182 63 218 70" stroke="#ffffff" stroke-opacity=".40" stroke-width="9" fill="none"/>
-            <path d="M169 87 Q201 60 227 74" stroke="#dfe7ec" stroke-opacity=".48" stroke-width="6" fill="none"/>
-          </g>
-          <g id="hairLong" display="none">
-            <path d="M152 103 Q157 56 215 57 Q280 58 272 145 L283 259 Q249 275 244 244 L247 115 Q211 105 193 92 Q170 137 151 131 L149 247 Q129 257 136 215Z" fill="var(--hair)" stroke="#392c40" stroke-width="4"/>
-            <path d="M155 98 Q201 59 246 83" stroke="#fff" stroke-opacity=".18" stroke-width="7" fill="none"/>
-          </g>
-          <g id="eyesOpen">
-            <ellipse cx="184" cy="145" rx="12" ry="14" fill="#fffdf6"/>
-            <ellipse cx="232" cy="143" rx="12" ry="14" fill="#fffdf6"/>
-            <circle cx="189" cy="146" r="6" fill="#3d5161"/><circle cx="236" cy="144" r="6" fill="#3d5161"/>
-            <circle cx="191" cy="143" r="2" fill="#fff"/><circle cx="238" cy="141" r="2" fill="#fff"/>
-          </g>
-          <g id="eyesClosed" display="none"><path d="M174 145 Q186 150 196 144 M220 143 Q232 150 243 142" stroke="#593e4c" stroke-width="4" fill="none"/></g>
-          <g id="browsNormal"><path d="M174 124 Q183 118 196 124 M220 122 Q232 117 244 123" stroke="#533849" stroke-width="5" fill="none"/></g>
-          <g id="browsSad" display="none"><path d="M175 121 L195 128 M220 126 L245 120" stroke="#533849" stroke-width="5" fill="none"/></g>
-          <g id="browsRaised" display="none"><path d="M175 116 Q186 109 197 116 M218 114 Q232 106 245 113" stroke="#533849" stroke-width="5" fill="none"/></g>
-          <path d="M208 144 Q198 163 210 168 L220 164" stroke="#a77762" stroke-width="4" fill="none"/>
-          <g id="beard" fill="var(--beard)" stroke="#4b4c59" stroke-width="2">
-            <path d="M153 165 Q153 192 168 207 Q174 229 200 233 Q210 247 225 233 Q252 227 258 204 Q273 186 267 166 Q251 175 244 190 Q236 201 222 198 Q211 209 200 198 Q182 201 171 186 Q164 171 153 165Z"/>
-            <path d="M180 179 Q194 172 207 180 Q224 172 239 179 Q227 192 210 189 Q192 192 180 179Z"/>
-            <path d="M176 204 Q203 226 237 207" fill="none" stroke="#b5b5bc" stroke-opacity=".5" stroke-width="4"/>
-            <path d="M172 196 Q177 218 195 222 M246 195 Q241 218 226 225" fill="none" stroke="#cbd0d4" stroke-opacity=".36" stroke-width="3"/>
-          </g>
-          <g id="mouthNeutral"><path d="M193 180 Q210 186 228 179" stroke="#9c5c5b" stroke-width="4" fill="none"/></g>
-          <g id="mouthSmile" display="none"><path d="M192 178 Q210 197 230 177" fill="#7b3d55" stroke="#9a5560" stroke-width="3"/><path d="M197 180 Q211 186 225 180" fill="none" stroke="#fff4e8" stroke-width="4"/></g>
-          <g id="mouthShout" display="none"><ellipse cx="212" cy="185" rx="16" ry="21" fill="#56283f" stroke="#a45361" stroke-width="3"/><path d="M200 175 Q211 181 224 175" stroke="#fff9ef" stroke-width="5"/></g>
-          <g id="mouthSad" display="none"><path d="M194 189 Q211 174 229 191" stroke="#9d5260" stroke-width="4" fill="none"/></g>
-          <g id="tears" display="none" fill="#a8e5ff" stroke="#5da9d8" stroke-width="2">
-            <path d="M180 156 Q173 172 178 179 Q186 181 187 175Z"/>
-            <path d="M232 155 Q227 174 236 187 Q245 181 239 171Z"/>
-          </g>
-        </g>
-        <!-- Basic arm, and a separately swappable action arm -->
-        <g id="armNormal">
-          <path d="M263 239 Q295 264 287 323" stroke="var(--shirt-shadow)" stroke-width="30" fill="none"/>
-          <path d="M287 314 Q291 330 284 338" stroke="var(--skin)" stroke-width="25" fill="none"/>
-          <ellipse cx="285" cy="334" rx="15" ry="18" fill="var(--skin)" stroke="#8e685e" stroke-width="2"/>
-        </g>
-        <g id="armWorking" display="none">
-          <path d="M263 235 Q290 210 252 183" stroke="var(--shirt-shadow)" stroke-width="29" fill="none"/>
-          <path d="M252 183 L242 167" stroke="var(--skin)" stroke-width="23" fill="none"/>
-          <circle cx="242" cy="166" r="13" fill="var(--skin)" stroke="#8e685e" stroke-width="2"/>
-          <g id="toothbrush" display="none" transform="rotate(-26 239 159)">
-            <rect x="235" y="122" width="8" height="52" rx="4" fill="#f3f8ff" stroke="#327c9f" stroke-width="2"/>
-            <rect x="231" y="115" width="17" height="12" rx="3" fill="#6fc4dd"/>
-          </g>
-          <g id="razor" display="none" transform="rotate(-35 241 158)">
-            <rect x="239" y="126" width="6" height="44" rx="3" fill="#9ec5d8" stroke="#426d82" stroke-width="2"/>
-            <rect x="230" y="120" width="25" height="9" rx="3" fill="#dfeef6"/>
-          </g>
-          <g id="makeupBrush" display="none" transform="rotate(-27 241 158)">
-            <rect x="239" y="124" width="7" height="48" rx="3" fill="#b98769"/>
-            <path d="M238 123 Q242 102 248 122Z" fill="#f3c5ce" stroke="#ad7586" stroke-width="2"/>
-          </g>
-          <g id="nailClipper" display="none">
-            <rect x="230" y="158" width="27" height="11" rx="4" fill="#a3c9d3" stroke="#3e6877" stroke-width="2"/>
-            <path d="M240 157 L247 149" stroke="#f6f8fb" stroke-width="4"/>
-          </g>
-        </g>
-      </g>
-      <!-- In plural pronoun practice, two distinct actor instances share the
-           animation rig; the second can later receive an independent profile. -->
-      <use id="supportActor" href="#char" transform="translate(195 116) scale(.68)" style="--hair:#556a74;--shirt:#587aa1;--shirt-shadow:#3b5678;--beard:#687783" display="none" opacity=".98"/>
-    </svg>
-  </div>
-  <div class="info"><strong id="phrase">Hello!</strong><span id="meaning">Hola. Prueba una acción para ver cómo cambian las piezas.</span></div>
-  <div class="grammar"><b id="grammar-label">He / His</b><div id="grammar-sentence">He is standing still.</div></div>
+<section class="panel">
+ <div class="portrait" id="portrait"><img id="hero" alt="Protagonista maduro de cabello plateado" src="../assets/hero/beard.webp"></div>
+ <div class="caption"><strong>El explorador</strong><p>Adulto, cabello plateado, complexión robusta</p></div>
+ <div class="toolbar"><button id="repeat">Escuchar acción</button><button id="save">Guardar apariencia</button></div>
+ <div id="feedback"><strong>He is standing.</strong><span>Él está de pie.</span></div>
 </section>
-<section class="card">
-  <h2>Laboratorio de movimientos</h2>
-  <fieldset><legend>ACCIONES</legend><div class="actions" id="actions">
-    <button data-action="idle" class="active">🧍 Quieto</button>
-    <button data-action="walk">🚶 Caminar</button>
-    <button data-action="wave">👋 Saludar</button>
-    <button data-action="blink">👁 Parpadear</button>
-    <button data-action="shout">📣 Gritar</button>
-    <button data-action="cry">💧 Llorar</button>
-    <button data-action="brush">🪥 Cepillarse</button>
-    <button data-action="shave">🪒 Rasurarse</button>
-    <button data-action="makeup">🖌 Maquillarse</button>
-    <button data-action="nails">✂ Cortar uñas</button>
-    <button data-action="smile">🙂 Sonreír</button>
-    <button data-action="shirt">👕 Ponerse camisa</button>
-    <button data-action="suit">👔 Ponerse traje</button>
-    <button data-action="undress">🧥 Quitarse camisa</button>
-    <button data-action="rest">↺ Reiniciar</button>
-  </div></fieldset>
-  <fieldset><legend>ESPACIO Y PERSONAJES</legend><div class="controls">
-      <label>Zona<select id="context"><option value="all">Todas las acciones</option><option value="mirror">Espejo: rostro y cuidado</option><option value="wardrobe">Ropero: vestirse y cambiar ropa</option></select></label>
-      <label>Quién realiza la acción<select id="actor"><option value="he">Él · He</option><option value="she">Ella · She</option><option value="they">Ellos · They</option></select></label>
-    </div></fieldset>
-  <fieldset><legend>APARIENCIAS INDEPENDIENTES</legend>
-    <div class="controls">
-      <label>Color de la ropa<select id="outfit"><option value="brick">Terracota</option><option value="teal">Turquesa</option><option value="purple">Morado</option><option value="orange">Coral</option></select></label>
-      <label>Cabello<select id="hair"><option value="short">Corto</option><option value="long">Largo</option></select></label>
-      <label>Color de cabello<select id="hairColor"><option value="silver">Plateado</option><option value="brown">Castaño</option><option value="black">Negro</option><option value="blonde">Rubio</option></select></label>
-      <label>Tono de piel<select id="skin"><option value="medium">Medio</option><option value="light">Claro</option><option value="dark">Oscuro</option></select></label>
-      <label>Barba<select id="beardStyle"><option value="full">Barba completa</option><option value="none">Sin barba</option></select></label>
-    </div>
-  </fieldset>
-  <div class="lab-tools"><button type="button" id="saveAvatar">↓ Exportar personaje JSON</button></div>
-  <p class="note">Prototipo gratuito con diseño original, sin Spine ni assets de terceros. El personaje maduro tiene piezas vectoriales independientes para ojos, cejas, boca, barba, cabello, torso, brazos y piernas. Los cambios de vestuario y el uso de <b>he, she, they, his, her y their</b> son demostraciones educativas. Para un personaje final de calidad 3D caricaturesca necesitaremos arte más detallado. Esta prueba todavía no sustituye al protagonista del juego principal.</p>
+<section class="panel">
+ <h2>Barba y rostro</h2><div class="buttons">
+  <button data-beard="full">Barba completa</button><button data-beard="none">Sin barba</button>
+ </div>
+ <h2>Ropero · Wardrobe</h2><div class="buttons">
+  <button data-outfit="casual">Ropa casual</button><button data-outfit="formal">Traje formal</button>
+ </div>
+ <h2>Órdenes en inglés</h2><div class="buttons">
+  <button data-action="shave">Shave your beard</button><button data-action="suit">Put on a suit</button>
+  <button data-action="shirt">Put on your jacket</button><button data-action="smile">Smile</button>
+  <button data-action="brush">Brush your teeth</button><button data-action="walk">Walk around</button>
+ </div>
+ <p class="instructions">Las acciones de cambiarse de ropa y afeitarse actualizan el personaje en todas las habitaciones. Los movimientos complejos siguen pendientes de sprites animados individuales.</p>
+ <p class="note">Esta versión ya usa imágenes rasterizadas del protagonista, no el personaje vectorial anterior. La personalización de cabello, rostro, atuendos adicionales y más personajes se incorporará a medida que tengamos recursos artísticos consistentes.</p>
 </section>
 </main>
-<footer>Word Quest Character Lab · Prototipo ilustrado en SVG/CSS/JavaScript · Fuente editable dentro del repositorio.</footer>
 <script>
-(function(){
-  const stage=document.getElementById('stage');
-  const $=id=>document.getElementById(id);
-  const hide=(ids)=>ids.forEach(id=>$(id).setAttribute('display','none'));
-  const show=id=>$(id).setAttribute('display','inline');
-  const eyes=['eyesOpen','eyesClosed'];
-  const eyebrows=['browsNormal','browsSad','browsRaised'];
-  const mouths=['mouthNeutral','mouthSmile','mouthShout','mouthSad'];
-  const props=['toothbrush','razor','makeupBrush','nailClipper'];
-  const sayings={
-    idle:['Stand still.','Quédate quieto.'],
-    walk:['Walk around.','Camina por la habitación.'],
-    wave:['Wave your hand.','Saluda con la mano.'],
-    blink:['Blink your eyes.','Parpadea.'],
-    shout:['Shout!','¡Grita!'],
-    cry:['Cry.','Llora.'],
-    brush:['Brush your teeth.','Cepíllate los dientes.'],
-    shave:['Shave your beard.','Rasúrate la barba.'],
-    makeup:['Put on makeup.','Maquíllate.'],
-    nails:['Cut your nails.','Córtate las uñas.'],
-    smile:['Smile.','Sonríe.'],
-    shirt:['Put on your shirt.','Ponte la camisa.'],
-    suit:['Put on your suit.','Ponte el traje.'],
-    undress:['Take off your shirt.','Quítate la camisa.'],
-    rest:['Stand still.','Quédate quieto.']
-  };
-  let blinkTimer=null;
-  let currentAction='idle';
-  let outfitState='shirt';
-  const thirdPerson={idle:'standing still',walk:'walking around',wave:'waving',blink:'blinking',shout:'shouting',cry:'crying',brush:'brushing',shave:'shaving',makeup:'putting on',nails:'cutting',smile:'smiling',shirt:'putting on',suit:'putting on',undress:'taking off',rest:'standing still'};
-  const objectText={brush:'teeth',shave:'face',makeup:'makeup',nails:'nails',shirt:'shirt',suit:'suit',undress:'shirt'};
-  function updateGrammar(){
-    const who=$('actor').value;
-    const pronouns={he:['He','his','is','He / His'],she:['She','her','is','She / Her'],they:['They','their','are','They / Their']}[who];
-    const [subject,possessive,aux,label]=pronouns;
-    const verb=thirdPerson[currentAction]||'standing still';
-    const obj=objectText[currentAction];
-    const suffix=obj?(' '+(['makeup'].includes(currentAction)?'':possessive+' ')+obj):'';
-    $('grammar-label').textContent=label;
-    $('grammar-sentence').textContent=`${subject} ${aux} ${verb}${suffix}.`;
-  }
-  function applyWardrobe(){
-    $('shirtLayer').setAttribute('display',outfitState==='shirt'?'inline':'none');
-    $('suitLayer').setAttribute('display',outfitState==='suit'?'inline':'none');
-    stage.classList.toggle('bare',outfitState==='none');
-  }
-  function action(name){
-    clearTimeout(blinkTimer);
-    currentAction=name;
-    stage.className='stage '+(name==='rest'?'idle':name);
-    if(name==='shirt')outfitState='shirt';
-    if(name==='suit')outfitState='suit';
-    if(name==='undress')outfitState='none';
-    applyWardrobe();
-    hide([...eyes,...eyebrows,...mouths,...props,'tears','armWorking']);
-    show('eyesOpen');show('browsNormal');show('mouthNeutral');show('armNormal');
-    if(['brush','shave','makeup','nails'].includes(name)){
-      $('armNormal').setAttribute('display','none');show('armWorking');
-      show({brush:'toothbrush',shave:'razor',makeup:'makeupBrush',nails:'nailClipper'}[name]);
-    }
-    if(name==='blink'){
-      hide(['eyesOpen']);show('eyesClosed');
-      blinkTimer=setTimeout(()=>{show('eyesOpen');hide(['eyesClosed'])},550);
-    }
-    if(name==='cry'){
-      hide(['browsNormal','mouthNeutral']);show('browsSad');show('mouthSad');show('tears');
-    }
-    if(name==='shout'){
-      hide(['browsNormal','mouthNeutral']);show('browsRaised');show('mouthShout');
-    }
-    if(name==='smile'){hide(['mouthNeutral']);show('mouthSmile')}
-    $('phrase').textContent=sayings[name][0];$('meaning').textContent=sayings[name][1];
-    updateGrammar();
-    document.querySelectorAll('[data-action]').forEach(b=>b.classList.toggle('active',b.dataset.action===name));
-  }
-  document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>action(b.dataset.action)));
-  const palettes={
-    outfit:{brick:['#a65749','#783d3d'],teal:['#579a9a','#327578'],purple:['#9c77b7','#6d4d91'],orange:['#db8a68','#9e5b53']},
-    skin:{medium:['#e6b484','#bb805e'],light:['#f4d6b7','#d5a27e'],dark:['#9a654e','#754736']},
-    hairColor:{silver:'#8a8e99',brown:'#473349',black:'#222837',blonde:'#9c6c43'}
-  };
-  $('outfit').onchange=e=>{document.documentElement.style.setProperty('--shirt',palettes.outfit[e.target.value][0]);document.documentElement.style.setProperty('--shirt-shadow',palettes.outfit[e.target.value][1])};
-  $('skin').onchange=e=>{document.documentElement.style.setProperty('--skin',palettes.skin[e.target.value][0]);document.documentElement.style.setProperty('--skin-shadow',palettes.skin[e.target.value][1])};
-  $('hairColor').onchange=e=>document.documentElement.style.setProperty('--hair',palettes.hairColor[e.target.value]);
-  $('hair').onchange=e=>{hide(['hairShort','hairLong']);show(e.target.value==='short'?'hairShort':'hairLong')};
-  $('beardStyle').onchange=()=>{ $('beard').setAttribute('display',$('beardStyle').value==='full'?'inline':'none') };
-  $('actor').onchange=()=>{
-    $('supportActor').setAttribute('display',$('actor').value==='they'?'inline':'none');
-    if($('actor').value==='she'){
-      $('hair').value='long';$('hair').onchange({target:$('hair')});
-      $('beardStyle').value='none';$('beardStyle').onchange();
-    } else if($('actor').value==='he'){
-      $('hair').value='short';$('hair').onchange({target:$('hair')});
-      $('beardStyle').value='full';$('beardStyle').onchange();
-    }
-    updateGrammar();
-  };
-  $('context').onchange=()=>{
-    const zone=$('context').value;
-    const sets={mirror:['idle','blink','shout','cry','brush','shave','makeup','nails','smile'],wardrobe:['idle','shirt','suit','undress']};
-    document.querySelectorAll('[data-action]').forEach(button=>{
-      button.hidden=zone!=='all'&&!sets[zone].includes(button.dataset.action);
-    });
-    action('idle');
-  };
-  const saved=localStorage.getItem('wq-avatar-demo-v2');
-  if(saved){try{const c=JSON.parse(saved);if(c.outfit)$('outfit').value=c.outfit;if(c.hairColor)$('hairColor').value=c.hairColor;if(c.skin)$('skin').value=c.skin;}catch{}}
-  for(const id of ['outfit','hairColor','skin']){
-    $(id).dispatchEvent(new Event('change'));
-    $(id).addEventListener('change',()=>localStorage.setItem('wq-avatar-demo-v2',JSON.stringify({outfit:$('outfit').value,hairColor:$('hairColor').value,skin:$('skin').value})));
-  }
-  $('saveAvatar').onclick=()=>{
-    const config={
-      version:1,
-      actor:$('actor').value,
-      mode:$('context').value,
-      character:{body:'tall_broad',age:'mature',hair:$('hair').value,hairColor:$('hairColor').value,beard:$('beardStyle').value,skin:$('skin').value,shirtColor:$('outfit').value,outfit:outfitState},
-      lastAction:currentAction
-    };
-    const data=new Blob([JSON.stringify(config,null,2)],{type:'application/json'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(data);a.download='wordquest-avatar.json';a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),500);
-  };
-  action('idle');
-})();
-</script>
-<script>
-// Shared local avatar profile; Word Quest loads it on game startup.
-(() => {
-  const $ = id => document.getElementById(id);
-  const KEY = 'wq-avatar-profile-v1';
-  const stage = $('stage');
-  const query = new URLSearchParams(location.search);
-  let lastOutfit = 'casual';
-  let saved;
-  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { saved = null; }
-  if(saved){
-    for(const [id,val] of [
-      ['hair',saved.hair],['hairColor',saved.hairColor],['skin',saved.skin],
-      ['beardStyle',saved.beard],['outfit',saved.shirtColor],['actor',saved.actor]
-    ]){
-      if(val && $(id) && [...$(id).options].some(o=>o.value===val)){
-        $(id).value=val;
-        $(id).dispatchEvent(new Event('change'));
-      }
-    }
-    if(saved.outfit==='formal') document.querySelector('[data-action="suit"]')?.click();
-    else if(saved.outfit==='home') document.querySelector('[data-action="undress"]')?.click();
-    lastOutfit=saved.outfit || 'casual';
-  }
-  const station=query.get('zone');
-  if(station==='mirror'||station==='wardrobe'){
-    $('context').value=station;
-    $('context').dispatchEvent(new Event('change'));
-  }
-  const save=()=>{
-    const outfit=stage.classList.contains('bare')?'home':
-      $('suitLayer').getAttribute('display')!=='none'?'formal':
-      lastOutfit==='pajamas'?'pajamas':'casual';
-    const p={
-      actor:$('actor').value,beard:$('beardStyle').value,
-      outfit,hair:$('hair').value,hairColor:$('hairColor').value,
-      skin:$('skin').value,shirtColor:$('outfit').value
-    };
-    localStorage.setItem(KEY,JSON.stringify(p));
-  };
-  for(const id of ['actor','beardStyle','hair','hairColor','skin','outfit']){
-    $(id).addEventListener('change',save);
-  }
-  $('actions').addEventListener('click', e => {
-    const button=e.target.closest('[data-action]');
-    if(!button)return;
-    const name=button.dataset.action;
-    if(name==='suit')lastOutfit='formal';
-    if(name==='shirt')lastOutfit='casual';
-    if(name==='undress')lastOutfit='home';
-    if(name==='shave'){
-      // Completing a shave visibly changes the character to clean-shaven.
-      setTimeout(()=>{
-        $('beardStyle').value='none';
-        $('beardStyle').dispatchEvent(new Event('change'));
-        save();
-      },550);
-    } else queueMicrotask(save);
-  });
-  $('saveAvatar').addEventListener('click',save);
-  save();
-})();
-</script>
-</body>
-</html>
+const KEY='wq-avatar-profile-v1';
+const DEFAULT={actor:'he',beard:'full',outfit:'casual',hair:'short',hairColor:'silver',skin:'medium',shirtColor:'brick'};
+let state;try{state={...DEFAULT,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{state={...DEFAULT}};
+const $=id=>document.getElementById(id);
+const assets={beard:'../assets/hero/beard.webp',shaved:'../assets/hero/shaved.webp',suit:'../assets/hero/suit.webp'};
+const phrases={shave:['Shave your beard.','Rasúrate la barba.'],suit:['Put on your suit.','Ponte el traje.'],shirt:['Put on your jacket.','Ponte la chaqueta.'],smile:['Smile.','Sonríe.'],brush:['Brush your teeth.','Cepíllate los dientes.'],walk:['Walk around.','Camina por la habitación.']};
+let current='He is standing.';
+function refresh(){
+ const art=state.outfit==='formal'?'suit':state.beard==='none'?'shaved':'beard';
+ $('hero').src=assets[art];
+ document.querySelectorAll('[data-beard]').forEach(b=>b.classList.toggle('active',b.dataset.beard===state.beard));
+ document.querySelectorAll('[data-outfit]').forEach(b=>b.classList.toggle('active',b.dataset.outfit===state.outfit));
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));refresh()}
+function speak(text){if(!('speechSynthesis'in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=.85;window.speechSynthesis.speak(u)}
+function feedback(en,es,animate=true){current=en;$('feedback').querySelector('strong').textContent=en;$('feedback').querySelector('span').textContent=es;if(animate){const p=$('portrait');p.classList.remove('acting');void p.offsetWidth;p.classList.add('acting');}speak(en)}
+document.querySelectorAll('[data-beard]').forEach(b=>b.addEventListener('click',()=>{state.beard=b.dataset.beard;save();feedback(state.beard==='none'?'He is clean-shaven.':'He has a beard.',state.beard==='none'?'Él está afeitado.':'Él tiene barba.')}));
+document.querySelectorAll('[data-outfit]').forEach(b=>b.addEventListener('click',()=>{state.outfit=b.dataset.outfit;save();feedback(state.outfit==='formal'?'He is wearing a suit.':'He is wearing casual clothes.',state.outfit==='formal'?'Él lleva un traje.':'Él lleva ropa casual.')}));
+document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>{const a=b.dataset.action;if(a==='shave'){state.beard='none';save()}if(a==='suit'){state.outfit='formal';save()}if(a==='shirt'){state.outfit='casual';save()}feedback(...phrases[a])}));
+$('repeat').onclick=()=>speak(current);$('save').onclick=()=>{save();feedback('Your avatar is saved.','Tu personaje está guardado.',false)};
+refresh();
+</script></body></html>

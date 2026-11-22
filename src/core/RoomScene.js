@@ -16,7 +16,7 @@ export class RoomScene extends Phaser.Scene {
   }
   create(){
     this.cameras.main.setBackgroundColor('#222c45');
-    this.add.image(640,360,`room-${this.room.background}`).setDepth(0);
+    this.backgroundArt=this.add.image(640,360,`room-${this.room.background}`).setDepth(0);
     const dust=this.add.particles(640,280,'obj-plant',{
        x:{min:-490,max:490},y:{min:-180,max:190},speedX:{min:-6,max:8},speedY:{min:-11,max:-2},
        scale:{start:.006,end:0},alpha:{start:.22,end:0},lifespan:5400,frequency:700,blendMode:'ADD'
@@ -122,6 +122,7 @@ export class RoomScene extends Phaser.Scene {
     this.handSprite?.setTexture(`obj-${currentlyHeld?.kind || 'book'}`)?.setVisible(!!currentlyHeld);
   }
   drawDoors(){
+    this.doorGraphics=[];
     this.room.exits.forEach(exit=>{
       const direction=exit.x>640?'→':'←';
       const frame=this.add.rectangle(exit.x,496,48,170,0x1e2339,.6).setStrokeStyle(2,0xe0bea6,.7).setDepth(18);
@@ -132,14 +133,46 @@ export class RoomScene extends Phaser.Scene {
       const leave=()=>this.goThroughDoor(exit);
       frame.setInteractive({useHandCursor:true}).on('pointerdown',leave);
       text.setInteractive({useHandCursor:true}).on('pointerdown',leave);
+      this.doorGraphics.push(frame,text);
     });
+  }
+  // Change the visible room IN PLACE. This prevents Phaser scene-restart races
+  // where the room label changes but old background and clickable objects stay.
+  changeRoom(roomId,entryX=640){
+    if(!this.sys.isActive()||this.busy)return false;
+    const next=this.controller.getRoom(roomId);
+    if(!next)return false;
+    for(const {sprite,label} of this.objects.values()){
+      sprite.destroy();label.destroy();
+    }
+    for(const ring of this.glows.values())ring.destroy();
+    for(const display of this.doorGraphics||[])display.destroy();
+    this.objects.clear();
+    this.glows.clear();
+    this.doorGraphics=[];
+    this.room=next;
+    this.roomId=roomId;
+    this.backgroundArt.setTexture(`room-${next.background}`);
+    this.hero.setPosition(Phaser.Math.Clamp(entryX,75,1200),631);
+    this.character.stop(false);
+    this.handSprite.setTexture('obj-book').setVisible(false);
+    next.objects.forEach(obj=>this.createObject(obj));
+    this.drawDoors();
+    this.isLeaving=false;
+    this.updateHand();
+    this.configureCamera(true);
+    return true;
   }
   async goThroughDoor(exit){
     if(this.isLeaving)return;
     if(this.busy){this.controller.toast('Termina primero la acción actual.');return;}
     this.isLeaving=true;
-    await this.walkTo(exit.x<640?105:1175);
-    if(this.scene.isActive('RoomScene'))this.controller.switchRoom(exit.to,{fromRoom:this.roomId,throughDoor:true});
+    const arrived=await this.walkTo(exit.x<640?105:1175);
+    if(arrived&&this.scene.isActive('RoomScene')){
+      this.controller.switchRoom(exit.to,{fromRoom:this.roomId,throughDoor:true});
+    }else{
+      this.isLeaving=false;
+    }
   }
   async walkTo(x){
     if(this.busy)return false;

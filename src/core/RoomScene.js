@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { ACTIONS } from '../data/actions.js';
 import { speak } from './audio.js';
+import { CharacterAnimator } from './CharacterAnimator.js';
 
 export class RoomScene extends Phaser.Scene {
   constructor(){ super({key:'RoomScene'}); this.pointerObject=null; }
-  init(data){this.controller=data.controller;this.room=this.controller.getRoom(data.roomId);this.roomId=data.roomId;}
+  init(data){this.controller=data.controller;this.room=this.controller.getRoom(data.roomId);this.roomId=data.roomId;this.busy=false;this.isLeaving=false;}
   preload(){
     const prefix=import.meta.env.BASE_URL+'assets/';
     for(const key of ['bedroom','living','kitchen'])this.load.image(`room-${key}`,`${prefix}rooms/${key}.png`);
@@ -22,12 +23,14 @@ export class RoomScene extends Phaser.Scene {
     }); dust.setDepth(1);
     this.objects=new Map();this.glows=new Map();
     this.room.objects.forEach(obj=>this.createObject(obj));
-    const startX=this.controller.lastHeroX ?? (this.roomId==='bedroom'?513:640);
+    const startX=this.controller.entryX ?? (this.roomId==='bedroom'?513:640);
+    this.controller.entryX=null;
     this.hero=this.add.sprite(startX,631,'hero-idle').setOrigin(.5,1).setDisplaySize(126,160).setDepth(14);
     this.hero.setInteractive(new Phaser.Geom.Rectangle(50,4,120,194),Phaser.Geom.Rectangle.Contains);
     this.hero.on('pointerdown',()=>this.controller.toast('Toca un objeto para descubrir acciones.'));
-    if(!this.anims.exists('hero-walking'))this.anims.create({key:'hero-walking',frames:[{key:'hero-walk1'},{key:'hero-walk2'}],frameRate:7,repeat:-1});
+    this.character=new CharacterAnimator(this,this.hero);
     this.handSprite=this.add.image(startX+29,538,'obj-book').setDisplaySize(42,42).setDepth(16).setVisible(false);
+    this.updateHand();
     this.drawDoors();
     this.input.on('pointerdown',(pointer,targets)=>{
       if(targets.length||this.controller.editorActive||this.busy)return;
@@ -57,7 +60,7 @@ export class RoomScene extends Phaser.Scene {
     sprite.on('pointerover',over);sprite.on('pointerout',out);
     sprite.on('pointerdown',()=>{
       if(this.controller.editorActive){this.controller.toast(`${obj.id}: arrastra para mover`);return;}
-      if(this.busy)return;
+      if(this.busy||this.isLeaving)return;
       speak(obj.name);
       this.controller.selectObject(obj);
     });
@@ -90,52 +93,65 @@ export class RoomScene extends Phaser.Scene {
         fontSize:'17px',fontFamily:'Arial',fontStyle:'bold',color:'#f9dfaf',align:'center',
         stroke:'#25273c',strokeThickness:4
       }).setOrigin(.5).setDepth(19);
-      frame.setInteractive({useHandCursor:true}).on('pointerdown',()=>this.controller.switchRoom(exit.to));
-      text.setInteractive({useHandCursor:true}).on('pointerdown',()=>this.controller.switchRoom(exit.to));
+      const leave=()=>this.goThroughDoor(exit);
+      frame.setInteractive({useHandCursor:true}).on('pointerdown',leave);
+      text.setInteractive({useHandCursor:true}).on('pointerdown',leave);
     });
   }
-  async walkTo(x){
-    if(this.busy)return;
-    const dist=Math.abs(this.hero.x-x);
-    if(dist<8)return;
-    this.busy=true;
-    this.hero.setFlipX(x<this.hero.x);
-    this.hero.play('hero-walking');
-    await new Promise(resolve=>this.tweens.add({targets:this.hero,x,duration:Math.max(180,Math.min(2200,dist*2.5)),ease:'Linear',onUpdate:()=>this.updateHand(),onComplete:resolve}));
-    this.hero.stop();this.hero.setTexture('hero-idle');this.updateHand();this.busy=false;
+  async goThroughDoor(exit){
+    if(this.isLeaving)return;
+    if(this.busy){this.controller.toast('Termina primero la acción actual.');return;}
+    this.isLeaving=true;
+    await this.walkTo(exit.x<640?105:1175);
+    if(this.scene.isActive('RoomScene'))this.controller.switchRoom(exit.to,{fromRoom:this.roomId,throughDoor:true});
   }
-  updateHand(){if(this.handSprite){this.handSprite.setPosition(this.hero.x+(this.hero.flipX?-23:28),this.hero.y-86)}}
+  async walkTo(x){
+    if(this.busy)return false;
+    const dist=Math.abs(this.hero.x-x);
+    if(dist<8)return true;
+    this.busy=true;
+    this.character.turn(x<this.hero.x);
+    this.character.walk();
+    await new Promise(resolve=>this.tweens.add({targets:this.hero,x,duration:Math.max(180,Math.min(2200,dist*2.5)),ease:'Linear',onUpdate:()=>this.updateHand(),onComplete:resolve}));
+    if(!this.scene.isActive('RoomScene'))return false;
+    this.character.rest(this.room.objects.some(o=>o.state.held));this.updateHand();this.busy=false;
+    return true;
+  }
+  updateHand(){
+    this.character?.syncLayers();
+    if(this.handSprite){this.handSprite.setPosition(this.hero.x+(this.hero.flipX?-23:28),this.hero.y-86)}
+  }
   async animateAction(obj,phrase,{preview=false}={}){
     if(this.busy)return false;
     const action=ACTIONS[phrase.action];if(!action)return false;
     const goal=Phaser.Math.Clamp(obj.x+(obj.x<this.hero.x?92:-92),80,1200);
-    await this.walkTo(goal);
+    const arrived=await this.walkTo(goal);
+    if(!arrived||!this.scene.isActive('RoomScene'))return false;
     this.busy=true;
-    this.hero.setFlipX(obj.x<this.hero.x);
-    const pose=({pickup:'crouch',place:'reach',switch:'use',open:'use',dress:'hold',sit:'sit',look:'use',clean:'crouch',eat:'hold',walk:'walk1'})[action.recipe]||'use';
-    this.hero.setTexture(`hero-${pose}`);
-    await new Promise(resolve=>this.time.delayedCall(Math.max(380,action.duration*.62),resolve));
+    this.character.turn(obj.x<this.hero.x);
+    const finished=await this.character.playRecipe(action.recipe,Math.max(380,action.duration*.62));
+    if(!finished||!this.scene.isActive('RoomScene'))return false;
     if(!preview){
       if(action.effects.held===true)for(const other of this.room.objects)if(other.id!==obj.id && other.state.held){other.state.held=false;this.updateObject(other)}
       Object.assign(obj.state,action.effects);this.updateObject(obj);
     }
     if(action.recipe==='switch'){this.cameras.main.flash(120,255,210,162,false)}
-    this.hero.setTexture(obj.state.held?'hero-hold':'hero-idle');this.updateHand();
+    this.character.rest(this.room.objects.some(o=>o.state.held));this.updateHand();
     this.busy=false;
     return true;
   }
   async previewAction(obj,phrase){return this.animateAction(obj,phrase,{preview:true})}
   async executeAction(obj,phrase){return this.animateAction(obj,phrase,{preview:false})}
   update(_time,delta){
-    if(!this.hero||this.busy||this.controller.editorActive)return;
+    if(!this.hero||this.busy||this.isLeaving||this.controller.editorActive)return;
     const left=this.keys.A.isDown||this.keys.LEFT.isDown||this.controller.movement<0;
     const right=this.keys.D.isDown||this.keys.RIGHT.isDown||this.controller.movement>0;
     if(left||right){
       const sign=right?1:-1;
       this.hero.x=Phaser.Math.Clamp(this.hero.x+sign*(delta*.31),60,1210);
-      this.hero.setFlipX(sign<0);
-      if(!this.hero.anims.isPlaying)this.hero.play('hero-walking');
+      this.character.turn(sign<0);
+      this.character.walk();
       this.updateHand();
-    }else if(this.hero.anims.isPlaying){this.hero.stop();this.hero.setTexture('hero-idle')}
+    }else if(this.hero.anims.isPlaying){this.character.rest(this.room.objects.some(o=>o.state.held))}
   }
 }

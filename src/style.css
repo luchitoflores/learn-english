@@ -33,3 +33,7 @@
   .room-exits{top:31px;right:7px}
   .room-exit{min-width:95px;min-height:37px;font-size:11px}
 }
+
+
+.avatar-lab-link{display:block;margin-top:14px;padding:14px 16px;border:1px solid #eac99985;border-radius:12px;color:#ffdfad;background:#2d3650;text-decoration:none;font-size:14px;font-weight:800;text-align:center;line-height:1.4}
+.avatar-lab-link:hover,.avatar-lab-link:focus-visible{background:#594863;border-color:#f8d5a9}

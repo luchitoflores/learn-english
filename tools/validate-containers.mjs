@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { CONTAINERS,roomContainers,makeContainerTask } from '../src/data/containers.js';
 import { ROOMS } from '../src/data/rooms.js';
+import { FRIDGE_DESTINATIONS, destinationsFor, placementTask } from '../src/core/FridgeFlow.js';
 const ids=new Set();
 for(const [id,c] of Object.entries(CONTAINERS)){
  assert(!ids.has(id));ids.add(id);
@@ -40,4 +41,25 @@ assert.equal(png.readUInt32BE(16),336);
 assert.equal(png.readUInt32BE(20),240);
 assert(CONTAINERS.fridge.items.some(i=>i.id==='eggs'));
 assert(CONTAINERS.toolbox.items.some(i=>i.id==='hammer'));
+const destinations=new Set(FRIDGE_DESTINATIONS.map(d=>d.id));
+assert.equal(destinations.size,5);
+for(const item of CONTAINERS.fridge.items){
+  const choices=destinationsFor(item);
+  assert(choices.length>=3,'Insufficient destinations for '+item.id);
+  assert(choices.every(d=>destinations.has(d.id)));
+  for(const destination of choices){
+    const task=placementTask(item,destination);
+    assert(task.english.includes(item.en),'English phrase must include item name');
+    assert(task.spanish.includes(item.es),'Spanish phrase must include meaning');
+    assert(task.english.endsWith('.'));
+    assert(!task.english.includes('{'));
+  }
+}
+const markup=fs.readFileSync('index.html','utf8');
+for(const id of ['inventory-tray-items','inventory-tray-count','inventory-place-targets',
+  'inventory-feedback-en','inventory-feedback-es','inventory-feedback-replay',
+  'inventory-reset-fridge','inventory-inside-count']){
+    assert(markup.includes('id="'+id+'"'),'Missing fridge interface '+id);
+}
+
 console.log('PASS:',ids.size,'data-driven room containers and illustrated inventory items');

@@ -1,6 +1,7 @@
 import { CONTAINERS,roomContainers,loadContainerStates,saveContainerStates,makeContainerTask } from '../data/containers.js';
 import { speak } from './audio.js';
 import { remember } from './storage.js';
+import { FridgeFlow } from './FridgeFlow.js';
 
 const $=id=>document.getElementById(id);
 const modes={
@@ -15,7 +16,7 @@ export class ContainerEngine {
   this.app=app;this.states=loadContainerStates();this.current=null;
   this.task=null;this.mode='discover';this.sequence=[];this.score=0;
   this.timeLeft=60;this.timer=null;this.advance=null;this.locked=false;
-  this.previous=null;this.category='all';this.page=0;this.pageSize=12;this.choices=[];this.bind();
+  this.previous=null;this.category='all';this.page=0;this.pageSize=12;this.choices=[];this.feedbackEnglish='';this.fridge=new FridgeFlow(this);this.bind();
  }
  bind(){
   $('inventory-close').onclick=()=>this.close();
@@ -26,9 +27,16 @@ export class ContainerEngine {
     if(this.page<pages-1){this.page++;this.render()}
   };
   $('inventory-replay').onclick=()=>this.task&&speak(this.task.english);
+  $('inventory-feedback-replay').onclick=()=>this.feedbackEnglish&&speak(this.feedbackEnglish);
   $('inventory-next').onclick=()=>{
    if(!this.current)return;
-   if(this.mode==='discover'){
+   if(this.current.id==='fridge'){
+    if(this.mode==='discover'){this.fridge.intro();this.render()}
+    else{
+     if((this.mode==='sequence'||this.mode==='story')&&this.fridge.roundsLeft<=0)this.fridge.roundsLeft=3;
+     this.next();
+    }
+   }else if(this.mode==='discover'){
     this.showMessage('Toca cualquier objeto para descubrir su nombre y practicar.');
    }else{
     if((this.mode==='sequence'||this.mode==='story')&&!this.sequence.length)this.makeSequence();
@@ -44,10 +52,20 @@ export class ContainerEngine {
  }
  isOut(id,itemId){return !!this.itemsState(id)[itemId]}
  setOut(id,itemId,value){
-  this.itemsState(id)[itemId]=!!value;saveContainerStates(this.states);
+  this.itemsState(id)[itemId]=!!value;this.persistStates();
+ }
+ persistStates(){saveContainerStates(this.states)}
+ showFeedback({en='',es='',note='',tone=''}={}){
+  $('inventory-result').dataset.tone=tone;
+  $('inventory-feedback-en').textContent=en||'Explore the objects.';
+  $('inventory-feedback-es').textContent=es;
+  $('inventory-feedback-note').textContent=note;
+  this.feedbackEnglish=en;
+  $('inventory-feedback-replay').disabled=!en;
  }
  showMessage(text,tone=''){
-  const box=$('inventory-result');box.textContent=text;box.dataset.tone=tone;
+  this.showFeedback({en:this.task?.english||'Explore the objects.',
+   es:this.task?.spanish||'Explora los objetos.',note:text,tone});
  }
  open(id){
   const container=CONTAINERS[id];
@@ -59,6 +77,7 @@ export class ContainerEngine {
   this.current=container;this.mode=this.app.modeEngine.mode;
   this.score=0;this.timeLeft=60;this.locked=false;this.previous=null;
   this.sequence=[];this.category='all';this.page=0;this.choices=[];
+  if(id==='fridge')this.fridge.open();else this.fridge.close();
   const showFilters=id==='fridge'&&this.mode==='discover';
   $('inventory-filters').classList.toggle('hidden',!showFilters);
   $('inventory-pager').classList.toggle('hidden',!showFilters);
@@ -70,10 +89,14 @@ export class ContainerEngine {
   $('inventory-next').textContent=this.mode==='discover'?'Explorar':'Otra orden';
   this.render();
   this.showMessage('Toca un objeto para empezar.');
-  if(this.mode==='discover'){
+  if(id==='fridge'){
+   if(this.mode==='discover')this.fridge.intro();else this.fridge.next();
+  }else if(this.mode==='discover'){
    $('inventory-prompt').textContent='Explore the objects.';
    $('inventory-translation').textContent='Explora los objetos.';
    $('inventory-replay').disabled=true;
+   this.showFeedback({en:'Explore the objects.',es:'Explora los objetos.',
+     note:'Toca un objeto para escuchar y aprender su nombre.'});
   }else if(this.mode==='sequence'||this.mode==='story'){
    this.makeSequence();this.next();
   }else this.next();
@@ -102,6 +125,7 @@ export class ContainerEngine {
  }
  next(){
   if(!this.current)return;
+  if(this.current.id==='fridge'){this.fridge.next();return}
   if(this.advance){clearTimeout(this.advance);this.advance=null}
   this.locked=false;
   if(['sequence','story'].includes(this.mode)){
@@ -139,8 +163,9 @@ export class ContainerEngine {
  }
  filteredItems(){
   if(!this.current)return [];
-  if(this.category==='all')return this.current.items;
-  return this.current.items.filter(item=>(item.category||'other')===this.category);
+  const items=this.current.id==='fridge'?this.fridge.inside():this.current.items;
+  if(this.category==='all')return items;
+  return items.filter(item=>(item.category||'other')===this.category);
  }
  renderFilters(){
   const holder=$('inventory-filters');
@@ -148,7 +173,7 @@ export class ContainerEngine {
   if(!this.current||this.current.id!=='fridge'||this.mode!=='discover')return;
   const choices=[['all','Todos'],['fruit','Frutas'],['vegetable','Verduras'],['other','Otros']];
   for(const [category,label] of choices){
-    const count=this.current.items.filter(item=>
+    const count=this.fridge.inside().filter(item=>
       category==='all'||(item.category||'other')===category).length;
     const button=document.createElement('button');
     button.type='button';
@@ -161,52 +186,57 @@ export class ContainerEngine {
     holder.append(button);
   }
  }
+ createItemArt(item){
+  if(Number.isInteger(item.spriteIndex)){
+   const art=document.createElement('span');art.className='inventory-pixel-sprite';
+   art.setAttribute('role','img');art.setAttribute('aria-label',item.en);
+   const col=item.spriteIndex%7,row=Math.floor(item.spriteIndex/7);
+   art.style.backgroundImage='url("'+asset(item)+'")';
+   art.style.backgroundSize=(7*64)+'px '+(5*64)+'px';
+   art.style.backgroundPosition=(-col*64)+'px '+(-row*64)+'px';
+   return art;
+  }
+  const art=document.createElement('img');art.src=asset(item);
+  art.alt=item.en;art.loading='eager';return art;
+ }
  render(){
   if(!this.current)return;
-  const container=this.current;
-  const paginated=container.id==='fridge'&&this.mode==='discover';
-  const filtered=this.filteredItems();
-  const totalPages=Math.max(1,Math.ceil(filtered.length/this.pageSize));
-  this.page=Math.min(this.page,totalPages-1);
+  const c=this.current,isFridge=c.id==='fridge',paginated=isFridge&&this.mode==='discover';
+  const filtered=this.filteredItems(),pages=Math.max(1,Math.ceil(filtered.length/this.pageSize));
+  this.page=Math.min(this.page,pages-1);
   const visible=paginated
-    ?filtered.slice(this.page*this.pageSize,(this.page+1)*this.pageSize)
-    :this.mode==='discover'?container.items:this.choices.length?this.choices:container.items;
+   ?filtered.slice(this.page*this.pageSize,(this.page+1)*this.pageSize)
+   :this.mode==='discover'?(isFridge?this.fridge.inside():c.items)
+    :this.choices.length?(isFridge?this.choices.filter(i=>this.fridge.location(i.id)==='fridge'):this.choices)
+      :isFridge?this.fridge.inside():c.items;
   $('inventory-items').replaceChildren(...visible.map(item=>{
-   const out=this.isOut(container.id,item.id);
-   const button=document.createElement('button');
-   button.type='button';
-   button.className='inventory-item'+(out?' is-out':'');
-   button.dataset.itemId=item.id;
-   let art;
-   if(Number.isInteger(item.spriteIndex)){
-     art=document.createElement('span');
-     art.className='inventory-pixel-sprite';
-     art.setAttribute('role','img');
-     art.setAttribute('aria-label',item.en);
-     const col=item.spriteIndex%7,row=Math.floor(item.spriteIndex/7);
-     art.style.backgroundImage='url("'+asset(item)+'")';
-     art.style.backgroundSize=(7*64)+'px '+(5*64)+'px';
-     art.style.backgroundPosition=(-col*64)+'px '+(-row*64)+'px';
-   }else{
-     art=document.createElement('img');
-     art.src=asset(item);art.alt=item.en;art.loading='eager';
-   }
+   const out=this.isOut(c.id,item.id);
+   const btn=document.createElement('button');btn.type='button';
+   btn.className='inventory-item'+(out?' is-out':'');btn.dataset.itemId=item.id;
    const label=document.createElement('strong');label.textContent=item.en;
-   const state=document.createElement('small');state.textContent=out?'FUERA':'DENTRO';
-   button.append(art,label,state);
-   button.onclick=()=>this.select(item);
-   return button;
+   const state=document.createElement('small');
+   state.textContent=isFridge?'DENTRO':out?'FUERA':'DENTRO';
+   btn.append(this.createItemArt(item),label,state);
+   btn.onclick=()=>this.select(item);return btn;
   }));
-  $('inventory-count').textContent=container.items.filter(i=>!this.isOut(container.id,i.id)).length+
-    ' guardados · '+container.items.filter(i=>this.isOut(container.id,i.id)).length+' fuera';
+  if(isFridge){
+   const inside=this.fridge.inside().length,tray=this.fridge.tray().length;
+   $('inventory-count').textContent=inside+' dentro · '+tray+' en bandeja · '+(c.items.length-inside-tray)+' colocados';
+   this.fridge.renderExtras();
+   if(paginated)this.renderFilters();
+  }else{
+   $('inventory-count').textContent=c.items.filter(i=>!this.isOut(c.id,i.id)).length+
+    ' guardados · '+c.items.filter(i=>this.isOut(c.id,i.id)).length+' fuera';
+  }
   if(paginated){
-    $('inventory-page').textContent='Página '+(this.page+1)+' de '+totalPages;
-    $('inventory-prev').disabled=this.page===0;
-    $('inventory-next-page').disabled=this.page>=totalPages-1;
+   $('inventory-page').textContent='Página '+(this.page+1)+' de '+pages;
+   $('inventory-prev').disabled=this.page===0;
+   $('inventory-next-page').disabled=this.page>=pages-1;
   }
  }
  select(item){
   if(!this.current||this.locked)return;
+  if(this.current.id==='fridge'){this.fridge.selectInside(item);return}
   const c=this.current;
   if(this.mode==='discover'){
    const t=makeContainerTask(c,item,!this.isOut(c.id,item.id));
@@ -214,7 +244,7 @@ export class ContainerEngine {
    this.render();speak(t.english);
    this.app.showStudy(t.english,t.spanish,item.en+' · '+item.es+' · '+c.name);
    this.record(t,true);
-   this.showMessage('✓ '+item.en+' = '+item.es+' · '+t.spanish,'good');
+   this.showFeedback({en:t.english,es:t.spanish,note:'✓ '+item.en+' = '+item.es,tone:'good'});
    return;
   }
   if(!this.task)return;
@@ -233,7 +263,7 @@ export class ContainerEngine {
   this.applyAppearance(item,t);
   this.render();this.renderStats();
   this.app.showStudy(t.english,t.spanish,c.en+' · '+item.en+' ('+item.es+')');
-  this.showMessage('✓ '+t.english+' · '+t.spanish,'good');
+  this.showFeedback({en:t.english,es:t.spanish,note:'✓ Acción correcta.',tone:'good'});
   this.app.feedback(true,t.english);
   if(this.mode==='sequence'||this.mode==='story')this.sequence.shift();
   this.advance=setTimeout(()=>{this.advance=null;this.next()},this.mode==='timed'?500:2600);
@@ -254,6 +284,7 @@ export class ContainerEngine {
   if(this.timer)clearInterval(this.timer);this.timer=null;
   if(this.advance)clearTimeout(this.advance);this.advance=null;
   const wasOpen=this.current!==null;
+  this.fridge.close();
   this.current=null;this.task=null;this.locked=false;
   $('inventory-layer').classList.add('hidden');
   if(wasOpen&&restore)this.app.modeEngine.setMode(this.app.modeEngine.mode);

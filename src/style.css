@@ -147,3 +147,88 @@
 @media(max-width:760px){
   .inventory-filter{font-size:11px;min-height:33px;padding:5px 8px}
 }
+
+
+/* Minecraft-like fridge inventory: illustrated objects, quickbar and destination slots. */
+.inventory-fridge-heading,.inventory-section-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.inventory-fridge-heading{margin-top:2px;color:#ffe9bc}
+.inventory-fridge-heading strong,.inventory-section-header strong{font-size:14px;line-height:1.3}
+.inventory-fridge-heading strong span,.inventory-section-header strong span{color:#b8d5ed;font-size:11px;font-weight:650;margin-left:5px}
+.inventory-fridge-heading small{font-size:11px;color:#f0d7a6;white-space:nowrap}
+.inventory-tray-section,.inventory-place-section{
+ border:1px solid #ccbb98b8;border-radius:15px;padding:10px 11px;
+ background:linear-gradient(160deg,#1a2942,#233854);
+}
+.inventory-tray-section.hidden,.inventory-place-section.hidden,.inventory-fridge-heading.hidden{display:none}
+.inventory-section-header{margin-bottom:9px}
+.inventory-section-header>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.inventory-section-header small{font-size:11px;color:#c0d4e5;line-height:1.3}
+#inventory-reset-fridge{border:1px solid #e0c59d;background:#3b5573;color:#f8e6c8;min-height:34px;padding:6px 9px;border-radius:10px;font-size:11px;font-weight:800;white-space:nowrap}
+.inventory-tray-items{display:grid;grid-auto-flow:column;grid-auto-columns:74px;gap:7px;overflow-x:auto;min-height:81px;padding:4px 2px 7px;scroll-snap-type:x proximity}
+.inventory-tray-item{
+ min-height:80px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+ border:2px solid #b7cbe0;border-radius:11px;
+ background:linear-gradient(150deg,#fff8e8,#e7d5b0);
+ color:#30364a;font-size:10px;font-weight:800;padding:4px 2px;scroll-snap-align:start;
+ box-shadow:inset 0 2px 5px #ffffffbb,0 2px 0 #101c34b0;touch-action:manipulation
+}
+.inventory-tray-item.selected{border-color:#ffc25d;box-shadow:0 0 0 2px #f7cf6988}
+.inventory-tray-item img{width:49px;height:49px;object-fit:contain}
+.inventory-tray-item .inventory-pixel-sprite{transform:scale(.73);margin:-9px}
+.inventory-tray-item>span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inventory-empty{margin:0;display:flex;align-items:center;justify-content:center;min-width:100%;color:#adbed3;font-size:12px;font-style:italic;min-height:66px;border:1px dashed #a6b4c166;border-radius:10px}
+.inventory-place-targets{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.inventory-destination{
+ position:relative;min-width:0;min-height:93px;border:2px solid #c4d1d8;border-radius:12px;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 2px;
+ background:linear-gradient(160deg,#faf4dc,#d6e0e7);
+ color:#2d3547;touch-action:manipulation;
+}
+.inventory-destination.hint{border-color:#eab34d;box-shadow:inset 0 0 0 2px #ffd26e,0 0 12px #ffcb6880;animation:inventory-target-glow 1.5s ease-in-out infinite}
+.inventory-destination:hover,.inventory-destination:focus-visible{border-color:#edb85b;background:#fff5d5}
+.inventory-destination-art{font-size:31px;width:48px;height:45px;display:flex;align-items:center;justify-content:center}
+.inventory-destination-art img{width:100%;height:100%;object-fit:contain}
+.inventory-destination strong{font-size:11px;font-weight:900;line-height:1.1;overflow-wrap:anywhere}
+.inventory-destination small{font-size:10px;line-height:1.05;color:#5e6675}
+.inventory-destination .destination-item-preview{position:absolute;right:0;top:0;width:22px;height:22px;object-fit:contain;border-radius:4px;background:#f2e0ae;border:1px solid #bd8c47}
+.inventory-destination .destination-item-preview.inventory-pixel-sprite{
+ width:64px;height:64px;transform:scale(.34);transform-origin:top right
+}
+@keyframes inventory-target-glow{50%{box-shadow:inset 0 0 0 2px #ffe6a4,0 0 17px #ffd26bb9}}
+.inventory-feedback{
+ background:#19533f;color:#f0ffeb;border:1px solid #83b3a3;
+}
+.inventory-feedback-row{display:flex;justify-content:space-between;align-items:center;gap:9px}
+.inventory-feedback-copy{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+#inventory-feedback-en{font-size:clamp(15px,3.5vw,21px);line-height:1.3;color:#fffce4}
+#inventory-feedback-es{font-size:13px;line-height:1.4;color:#dbf4e5}
+#inventory-feedback-note{color:#b2dac5;font-size:11px;line-height:1.35}
+#inventory-feedback-replay{flex-shrink:0;min-width:41px;width:41px;height:41px;border:1px solid #d1f5df;border-radius:50%;background:#276b58;color:#fff;font-size:21px}
+#inventory-feedback-replay:disabled{opacity:.35}
+.inventory-feedback[data-tone=good]{background:#145c48;border-color:#9acfb0;color:#e6ffe8}
+.inventory-feedback[data-tone=bad]{background:#663c41;border-color:#e2a79f;color:#fff0df}
+.inventory-fridge-mode .inventory-items{max-height:none}
+.inventory-fridge-mode .inventory-count{font-size:11px;margin-top:-3px}
+@media(max-width:760px){
+ .inventory-fridge-mode .inventory-panel{gap:7px;padding:10px}
+ .inventory-fridge-mode .inventory-items{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .inventory-fridge-mode .inventory-item{min-height:96px}
+ .inventory-fridge-mode .inventory-item img{height:55px}
+ .inventory-fridge-mode .inventory-place-targets{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+ .inventory-destination{min-height:83px}
+ .inventory-destination-art{width:38px;height:34px;font-size:26px}
+ .inventory-destination strong{font-size:10px}
+ .inventory-fridge-mode .inventory-section-header strong{font-size:13px}
+ .inventory-tray-items{grid-auto-columns:66px;min-height:76px}
+ .inventory-tray-item{min-height:72px}
+ #inventory-feedback-en{font-size:16px}
+ .inventory-fridge-mode .inventory-order{padding:8px 10px}
+}
+@media(max-width:400px){
+ .inventory-fridge-mode .inventory-panel{gap:6px;padding:8px}
+ .inventory-section-header strong span{display:block;margin-left:0}
+ .inventory-fridge-mode .inventory-place-targets{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .inventory-destination{padding:4px 1px}
+ .inventory-fridge-mode .inventory-item{min-height:93px}
+ .inventory-fridge-mode .inventory-item .inventory-pixel-sprite{transform:scale(.86);margin:-4px}
+}

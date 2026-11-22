@@ -86,18 +86,30 @@ try {
   await page.waitForFunction(()=>window.wordQuest?.roomId==='kitchen');
   await page.locator('#container-shortcuts button',{hasText:'Fridge'}).click();
   await page.waitForFunction(()=>window.wordQuest?.containers?.current?.id==='fridge',null,{timeout:15000});
-  assert.equal(await page.locator('#inventory-items button').count(),12,'Fridge grid must paginate');
+  assert.equal(await page.locator('#inventory-items button').count(),6,'Fridge grid must display six mobile choices');
   assert.equal(await page.locator('#inventory-filters button').count(),4,'Fridge category tabs missing');
   await page.locator('#inventory-filters button',{hasText:'Frutas'}).click();
-  assert.equal(await page.locator('#inventory-items button').count(),12,'Fruit grid page size incorrect');
+  assert.equal(await page.locator('#inventory-items button').count(),6,'Fruit grid page size incorrect');
   assert(await page.locator('#inventory-items button[data-item-id="banana"] .inventory-pixel-sprite').count(),
     'Banana 48px original sprite not visible');
   await page.locator('#inventory-items button[data-item-id="banana"]').click();
   assert((await page.locator('#study-english').textContent()).includes('banana'),'Banana discovery failed');
+  assert(await page.locator('#inventory-tray-items button[data-item-id="banana"]').isVisible(),
+    'Banana did not move into My tray');
+  assert((await page.locator('#inventory-feedback-en').textContent()).includes('Put the banana'),
+    'The English placement phrase must appear in the green feedback');
+  const discoveryDestination=await page.evaluate(()=>window.wordQuest.containers.fridge.target.id);
+  await page.locator('#inventory-place-targets button[data-destination="'+discoveryDestination+'"]').click();
+  assert.equal(await page.evaluate(()=>window.wordQuest.containers.fridge.location('banana')),
+    discoveryDestination,'Banana not placed into the selected destination');
+  assert((await page.locator('#inventory-feedback-en').textContent()).startsWith('Put the banana'),
+    'Placement feedback did not preserve the English sentence');
   await page.locator('#inventory-next-page').click();
-  assert((await page.locator('#inventory-page').textContent()).includes('2 de 2'),'Fruit pagination failed');
+  assert((await page.locator('#inventory-page').textContent()).includes('2 de 3'),'Fruit pagination failed');
   await page.locator('#inventory-filters button',{hasText:'Verduras'}).click();
   assert(await page.locator('#inventory-items button[data-item-id="carrot"]').isVisible(),'Carrot sprite missing');
+  assert(await page.locator('#inventory-tray-section').isVisible(),'Fridge tray section missing');
+  assert(await page.locator('#inventory-place-section').isVisible(),'Fridge placement area missing');
   await page.locator('#inventory-layer').screenshot({path:artifacts+'/fridge-mobile.png'});
   await page.locator('#inventory-close').click();
   await page.evaluate(()=>window.wordQuest.modeEngine.setMode('orders'));
@@ -105,9 +117,31 @@ try {
   await page.waitForFunction(()=>window.wordQuest?.containers?.task?.itemId);
   const target=await page.evaluate(()=>window.wordQuest.containers.task.itemId);
   assert.equal(await page.locator('#inventory-items button').count(),8,'Fridge mission needs eight visible choices');
+  assert((await page.locator('#inventory-feedback-en').textContent()).includes('Take out the '),
+    'English instruction must remain readable');
   await page.locator('#inventory-items button[data-item-id="'+target+'"]').click();
-  assert.equal(await page.evaluate(()=>window.wordQuest.containers.score),1,
-    'Fridge orders did not accept the correct item');
+  assert.equal(await page.evaluate(()=>window.wordQuest.containers.fridge.phase),'place',
+    'Taking out the grocery must lead to the place stage');
+  assert(await page.locator('#inventory-tray-items button[data-item-id="'+target+'"]').isVisible(),
+    'Taken-out grocery must appear in My tray');
+  const destination=await page.evaluate(()=>window.wordQuest.containers.fridge.target.id);
+  const phrase=await page.locator('#inventory-feedback-en').textContent();
+  assert(phrase.startsWith('Put the '),'English destination instruction is missing');
+  assert((await page.locator('#inventory-feedback-es').textContent()).length>8,'Spanish translation missing');
+  const wrong=await page.evaluate(id=>[...document.querySelectorAll('#inventory-place-targets button')]
+    .find(b=>b.dataset.destination!==id)?.dataset.destination,destination);
+  if(wrong){
+    await page.locator('#inventory-place-targets button[data-destination="'+wrong+'"]').click();
+    assert.equal(await page.evaluate(()=>window.wordQuest.containers.fridge.phase),'place',
+      'Incorrect destination must not complete the mission');
+  }
+  await page.locator('#inventory-place-targets button[data-destination="'+destination+'"]').click();
+  assert.equal(await page.evaluate(()=>window.wordQuest.containers.fridge.phase),'complete',
+    'Correct destination must complete the mission');
+  assert.equal(await page.evaluate(id=>window.wordQuest.containers.fridge.location(id),target),
+    destination,'Destination state was not saved');
+  assert(await page.locator('#inventory-feedback-replay').isEnabled(),'Feedback replay is unavailable');
+  await page.locator('#inventory-layer').screenshot({path:artifacts+'/fridge-orders-mobile.png'});
   await page.locator('#inventory-close').click();
   assert.equal(errors.length,0,'Browser asset or JavaScript errors: '+errors.join(' | '));
   console.log('PASS mobile browser smoke:',state,'next:',next,'canvas colors:',distinct.size);

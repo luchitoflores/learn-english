@@ -61,6 +61,10 @@
       <button id="inventory-replay" type="button" aria-label="Repetir orden en inglés">♫</button>
       <div><strong id="inventory-prompt">Explore the objects.</strong><small id="inventory-translation">Explora los objetos.</small></div>
     </div>
+    <div id="inventory-fridge-heading" class="inventory-fridge-heading hidden">
+      <strong>Dentro de la refrigeradora <span>Inside the fridge</span></strong>
+      <small id="inventory-inside-count">41 dentro</small>
+    </div>
     <nav id="inventory-filters" class="inventory-filters hidden" aria-label="Categorías de alimentos"></nav>
     <div id="inventory-items" class="inventory-items" role="group" aria-label="Objetos disponibles"></div>
     <div id="inventory-pager" class="inventory-pager hidden" aria-label="Páginas de alimentos">
@@ -69,7 +73,26 @@
       <button id="inventory-next-page" type="button" aria-label="Página siguiente">▶</button>
     </div>
     <p class="inventory-count" id="inventory-count"></p>
-    <div class="inventory-feedback" id="inventory-result" role="status" aria-live="polite"></div>
+    <section id="inventory-tray-section" class="inventory-tray-section hidden" aria-label="Mi bandeja">
+      <div class="inventory-section-header">
+        <div><strong>Mi bandeja <span>My tray</span></strong><small id="inventory-tray-count">0 alimentos</small></div>
+        <button id="inventory-reset-fridge" type="button" title="Devolver todos los alimentos a la refrigeradora">↺ Reponer todo</button>
+      </div>
+      <div id="inventory-tray-items" class="inventory-tray-items" role="group" aria-label="Alimentos que sacaste"></div>
+    </section>
+    <section id="inventory-place-section" class="inventory-place-section hidden" aria-label="Lugares para colocar alimentos">
+      <div class="inventory-section-header"><div><strong>Colócalo aquí <span>Place here</span></strong>
+      <small id="inventory-place-hint">Elige un alimento de tu bandeja.</small></div></div>
+      <div id="inventory-place-targets" class="inventory-place-targets" role="group" aria-label="Destinos para colocar los alimentos"></div>
+    </section>
+    <div class="inventory-feedback" id="inventory-result" role="status" aria-live="polite">
+      <div class="inventory-feedback-row"><div class="inventory-feedback-copy">
+        <strong id="inventory-feedback-en">Explore the objects.</strong>
+        <span id="inventory-feedback-es">Explora los objetos.</span>
+        <small id="inventory-feedback-note"></small>
+      </div>
+      <button id="inventory-feedback-replay" type="button" aria-label="Escuchar la frase en inglés de nuevo" title="Repetir frase">♫</button></div>
+    </div>
     <button id="inventory-next" class="inventory-next" type="button">Otra orden</button>
   </section>
 </div>

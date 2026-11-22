@@ -16,12 +16,12 @@ export const MODES=[
 const shuffle=a=>[...a].sort(()=>Math.random()-.5);
 
 export class ModeEngine {
-  constructor(app){this.app=app;this.mode='discover';this.mission=null;this.sequence=[];this.timer=null;this.timeLeft=60;this.score=0;this.locked=false;this.previous=new Set();}
+  constructor(app){this.app=app;this.mode='discover';this.mission=null;this.sequence=[];this.timer=null;this.timeLeft=60;this.score=0;this.locked=false;this.previous=new Set();this.pendingAdvance=null;this.epoch=0;}
   get room(){return this.app.room}
   get pool(){return allPhrases(this.room).filter(({object,phrase})=>isAvailable(object,phrase))}
   setMode(mode){
     if(!MODES.some(m=>m.id===mode))return;
-    this.clearTimer();this.mode=mode;this.mission=null;this.sequence=[];this.previous.clear();this.locked=false;
+    this.cancelPending();this.mode=mode;this.previous.clear();
     if(mode==='timed'){this.timeLeft=60;this.score=0;this.timer=setInterval(()=>this.tick(),1000)}
     this.app.drawModes();
     if(mode==='discover')this.app.setMission('Descubre las acciones','Toca un objeto y elige qué hará el personaje. Puedes practicar sin límites.',false);
@@ -29,6 +29,8 @@ export class ModeEngine {
     else this.newMission();
   }
   clearTimer(){if(this.timer)clearInterval(this.timer);this.timer=null}
+  cancelPending(){this.epoch++;if(this.pendingAdvance!==null){clearTimeout(this.pendingAdvance);this.pendingAdvance=null;}this.clearTimer();this.locked=false;this.mission=null;this.sequence=[]}
+  scheduleNext(callback,ms=3000){const epoch=this.epoch;if(this.pendingAdvance!==null)clearTimeout(this.pendingAdvance);this.pendingAdvance=setTimeout(()=>{this.pendingAdvance=null;if(epoch!==this.epoch)return;this.locked=false;callback()},ms)}
   tick(){
     if(this.mode!=='timed'){this.clearTimer();return}
     this.timeLeft--;this.app.updateTimer(this.timeLeft,this.score);
@@ -60,7 +62,9 @@ export class ModeEngine {
     if(this.mode==='production'){
       this.app.setMission('¿Qué acción observaste?',`Mira cómo actúa el personaje con «${object.name}» y elige la frase correcta.`,false);
       this.locked=true;
-      await this.app.scene.previewAction(object,phrase);
+      const epoch=this.epoch;
+      const animated=await this.app.scene.previewAction(object,phrase);
+      if(epoch!==this.epoch||!animated)return;
       this.locked=false;this.drawChoices('english');
     }else if(this.mode==='phrasal'){
       this.app.setMission('Phrasal verb challenge',`¿Qué expresión significa «${phrase.spanish}»?`,false);
@@ -96,36 +100,52 @@ export class ModeEngine {
   async pickChoice(correct){
     if(this.locked||!this.mission)return;
     this.locked=true;
+    const epoch=this.epoch;
     const {object,phrase}=this.mission;
     if(correct){
-      if(this.mode==='phrasal')await this.app.scene.executeAction(object,phrase);
+      if(this.mode==='phrasal'){
+        const animated=await this.app.scene.executeAction(object,phrase);
+        if(epoch!==this.epoch||!animated){if(epoch===this.epoch)this.locked=false;return;}
+      }
       this.record(true);this.app.feedback(true,`${phrase.english} · ${phrase.spanish}`);
-    }else{this.record(false);this.app.feedback(false,`Respuesta: ${phrase.english} · ${phrase.spanish}`)}
-    setTimeout(()=>{this.locked=false;if(this.mode==='production'||this.mode==='phrasal')this.newMission()},950);
+      this.app.showStudy(phrase.english,phrase.spanish,`Respuesta correcta · ${object.name}`);
+    }else{
+      this.record(false);this.app.feedback(false,`Respuesta: ${phrase.english} · ${phrase.spanish}`);
+      this.app.showStudy(phrase.english,phrase.spanish,'Respuesta correcta para repasar');
+    }
+    this.scheduleNext(()=>this.newMission(),3000);
   }
   async choose(object,phrase){
     if(this.locked)return;
     if(this.mode==='production'||this.mode==='phrasal')return;
     if(this.mode==='discover'){
       this.locked=true;
-      await this.app.scene.executeAction(object,phrase);
+      const epoch=this.epoch;
+      const animated=await this.app.scene.executeAction(object,phrase);
+      if(epoch!==this.epoch||!animated){if(epoch===this.epoch)this.locked=false;return;}
       this.record(true);this.app.feedback(true,`${phrase.english} · ${phrase.spanish}`);speak(phrase.english);
+      this.app.showStudy(phrase.english,phrase.spanish,`Acción realizada con ${object.name} · ${this.room.name}`);
       this.locked=false;this.app.closeActionPanel();return;
     }
     if(!this.mission)return;
     this.locked=true;
+    const epoch=this.epoch;
     const correct=(object.id===this.mission.object.id && phrase.action===this.mission.phrase.action && phrase.english===this.mission.phrase.english);
     if(correct){
-      await this.app.scene.executeAction(object,phrase);
+      const animated=await this.app.scene.executeAction(object,phrase);
+      if(epoch!==this.epoch||!animated){if(epoch===this.epoch)this.locked=false;return;}
       this.record(true);this.app.feedback(true,`${phrase.english} · ${phrase.spanish}`);speak(phrase.english);
+      this.app.showStudy(phrase.english,phrase.spanish,`Acción ejecutada · ${object.name}`);
       if(this.mode==='timed')this.score++;
       if(['sequence','story'].includes(this.mode))this.sequence.shift();
-    }else{this.record(false);this.app.feedback(false,`Intenta: ${this.mission.phrase.english} (${this.mission.phrase.spanish})`)}
+    }else{
+      this.record(false);this.app.feedback(false,`Intenta: ${this.mission.phrase.english} (${this.mission.phrase.spanish})`);
+      this.app.showStudy(this.mission.phrase.english,this.mission.phrase.spanish,'Corrección de la orden');
+    }
     this.app.closeActionPanel();
-    setTimeout(()=>{
-      this.locked=false;
+    this.scheduleNext(()=>{
       if(['sequence','story'].includes(this.mode))this.nextSequence();else this.newMission();
-    },950);
+    },this.mode==='timed'?550:3400);
   }
   record(correct){
     const task=this.mode==='discover'?this.app.selected:this.mission;
@@ -136,5 +156,5 @@ export class ModeEngine {
   reset(){
     this.previous.clear();this.locked=false;this.app.resetRoom();
   }
-  onRoomChange(){this.clearTimer();const mode=this.mode;this.setMode(mode)}
+  onRoomChange(){this.setMode(this.mode)}
 }

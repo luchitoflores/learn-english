@@ -133,11 +133,17 @@ class GameApp {
   }
   showMap(){
     $('modal-title').textContent='Mapa de la casa';
-    $('modal-content').replaceChildren(h('div',{className:'map-rooms'},ROOM_ORDER.map(id=>{
+    const rooms=h('div',{className:'map-rooms'},ROOM_ORDER.map(id=>{
       const room=ROOMS[id];const button=h('button');
       button.append(h('img',{src:`${import.meta.env.BASE_URL}assets/rooms/${id}.png`,alt:room.name}),h('span',{textContent:room.name}));
       button.onclick=()=>this.switchRoom(id);return button;
-    })));
+    }));
+    const lab=h('a',{
+      className:'avatar-lab-link',
+      href:`${import.meta.env.BASE_URL}character-lab/`,
+      textContent:'✦ Taller de personaje modular · Prueba expresiones y apariencias'
+    });
+    $('modal-content').replaceChildren(rooms,lab);
     $('modal-layer').classList.remove('hidden');
   }
   closeModal(){$('modal-layer').classList.add('hidden')}

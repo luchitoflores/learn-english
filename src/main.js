@@ -22,10 +22,15 @@ class GameApp {
   get room(){return this.getRoom(this.roomId)}
   getRoom(id){if(!this.cache[id])this.cache[id]=cloneRoom(id,this.custom);return this.cache[id]}
   setupPhaser(){
+    const viewport=$('game');
     this.game=new Phaser.Game({
       type:Phaser.AUTO,parent:'game',backgroundColor:'#282b44',
-      width:1280,height:720,transparent:false,
-      scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH,width:1280,height:720},
+      width:Math.max(320,viewport.clientWidth||640),
+      height:Math.max(240,viewport.clientHeight||360),
+      transparent:false,
+      // RESIZE fills the portrait game panel; the scene camera decides how
+      // much of the 1280×720 room to show instead of letterboxing it.
+      scale:{mode:Phaser.Scale.RESIZE},
       render:{antialias:true,pixelArt:false},
       scene:[],
       callbacks:{postBoot:(game)=>game.scene.add('RoomScene',RoomScene,true,{controller:this,roomId:this.roomId})}
@@ -36,6 +41,7 @@ class GameApp {
     $('room-en').textContent=this.room.en.toUpperCase();
     $('room-name').textContent=this.room.name;
     $('location-tag').innerHTML=this.room.name.toUpperCase()+' <span> · EXPLORE</span>';
+    this.drawRoomExits();
     this.modeEngine.onRoomChange();
     this.toast(`Llegaste a ${this.room.name}. Toca un objeto para escuchar su nombre.`);
   }
@@ -51,6 +57,21 @@ class GameApp {
     // ScenePlugin.restart queues shutdown and startup safely and ensures
     // the character, objects and input handlers belong to the new room.
     this.scene?.scene.restart({controller:this,roomId:id});
+  }
+  drawRoomExits(){
+    const exits=$('room-exits');
+    exits.replaceChildren(...this.room.exits.map(exit=>{
+      const left=exit.x<640;
+      const button=h('button',{
+        type:'button',
+        className:'room-exit '+(left?'to-left':'to-right'),
+        title:'Ir a '+exit.label,
+        textContent:(left?'◀ ':'')+exit.label+(left?'':' ▶')
+      });
+      button.setAttribute('aria-label','Ir a '+exit.label);
+      button.onclick=()=>this.scene?.goThroughDoor(exit);
+      return button;
+    }));
   }
   drawModes(){
     $('mode-dock').replaceChildren(...MODES.map(mode=>{

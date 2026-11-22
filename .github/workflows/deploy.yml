@@ -21,6 +21,20 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run validate
       - run: npm run build
+      - name: Install lightweight browser test dependencies
+        run: npm install --no-save --no-audit --no-fund playwright-core pngjs
+      - name: Verify actual mobile Phaser rendering and room navigation
+        run: |
+          (npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/wordquest-vite.log 2>&1 &)
+          sleep 4
+          node tools/smoke-browser.mjs
+      - name: Save browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wordquest-mobile-smoke
+          path: smoke-artifacts
+          if-no-files-found: ignore
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

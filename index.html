@@ -61,7 +61,13 @@
       <button id="inventory-replay" type="button" aria-label="Repetir orden en inglés">♫</button>
       <div><strong id="inventory-prompt">Explore the objects.</strong><small id="inventory-translation">Explora los objetos.</small></div>
     </div>
+    <nav id="inventory-filters" class="inventory-filters hidden" aria-label="Categorías de alimentos"></nav>
     <div id="inventory-items" class="inventory-items" role="group" aria-label="Objetos disponibles"></div>
+    <div id="inventory-pager" class="inventory-pager hidden" aria-label="Páginas de alimentos">
+      <button id="inventory-prev" type="button" aria-label="Página anterior">◀</button>
+      <span id="inventory-page">Página 1 de 1</span>
+      <button id="inventory-next-page" type="button" aria-label="Página siguiente">▶</button>
+    </div>
     <p class="inventory-count" id="inventory-count"></p>
     <div class="inventory-feedback" id="inventory-result" role="status" aria-live="polite"></div>
     <button id="inventory-next" class="inventory-next" type="button">Otra orden</button>

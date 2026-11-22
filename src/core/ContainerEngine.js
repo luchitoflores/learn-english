@@ -15,11 +15,16 @@ export class ContainerEngine {
   this.app=app;this.states=loadContainerStates();this.current=null;
   this.task=null;this.mode='discover';this.sequence=[];this.score=0;
   this.timeLeft=60;this.timer=null;this.advance=null;this.locked=false;
-  this.previous=null;this.bind();
+  this.previous=null;this.category='all';this.page=0;this.pageSize=12;this.choices=[];this.bind();
  }
  bind(){
   $('inventory-close').onclick=()=>this.close();
   $('inventory-scrim').onclick=()=>this.close();
+  $('inventory-prev').onclick=()=>{if(this.page>0){this.page--;this.render()}};
+  $('inventory-next-page').onclick=()=>{
+    const pages=Math.ceil(this.filteredItems().length/this.pageSize);
+    if(this.page<pages-1){this.page++;this.render()}
+  };
   $('inventory-replay').onclick=()=>this.task&&speak(this.task.english);
   $('inventory-next').onclick=()=>{
    if(!this.current)return;
@@ -53,7 +58,11 @@ export class ContainerEngine {
   this.app.modeEngine.cancelPending();
   this.current=container;this.mode=this.app.modeEngine.mode;
   this.score=0;this.timeLeft=60;this.locked=false;this.previous=null;
-  this.sequence=[];
+  this.sequence=[];this.category='all';this.page=0;this.choices=[];
+  const showFilters=id==='fridge'&&this.mode==='discover';
+  $('inventory-filters').classList.toggle('hidden',!showFilters);
+  $('inventory-pager').classList.toggle('hidden',!showFilters);
+  this.renderFilters();
   $('inventory-title').textContent=container.name;
   $('inventory-subtitle').textContent=container.en+' · '+container.items.length+' objetos';
   $('inventory-mode').textContent=modes[this.mode]||'Órdenes';
@@ -119,28 +128,82 @@ export class ContainerEngine {
     this.mode==='production'?'Selecciona el objeto correcto.':
     'Toca el objeto indicado.';
   this.showMessage('Escucha la orden y selecciona un objeto.');
+  // Larger collections still show just eight alternatives for each spoken
+  // mission. The correct item is ALWAYS among the choices.
+  this.choices=this.current.items.length>12
+    ?shuffle([this.current.items.find(i=>i.id===t.itemId),
+      ...shuffle(this.current.items.filter(i=>i.id!==t.itemId)).slice(0,7)])
+    :[...this.current.items];
   this.render();
   speak(t.english);
+ }
+ filteredItems(){
+  if(!this.current)return [];
+  if(this.category==='all')return this.current.items;
+  return this.current.items.filter(item=>(item.category||'other')===this.category);
+ }
+ renderFilters(){
+  const holder=$('inventory-filters');
+  holder.replaceChildren();
+  if(!this.current||this.current.id!=='fridge'||this.mode!=='discover')return;
+  const choices=[['all','Todos'],['fruit','Frutas'],['vegetable','Verduras'],['other','Otros']];
+  for(const [category,label] of choices){
+    const count=this.current.items.filter(item=>
+      category==='all'||(item.category||'other')===category).length;
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='inventory-filter'+(category===this.category?' active':'');
+    button.textContent=label+' ('+count+')';
+    button.setAttribute('aria-pressed',String(category===this.category));
+    button.onclick=()=>{
+      this.category=category;this.page=0;this.renderFilters();this.render();
+    };
+    holder.append(button);
+  }
  }
  render(){
   if(!this.current)return;
   const container=this.current;
-  $('inventory-items').replaceChildren(...container.items.map(item=>{
+  const paginated=container.id==='fridge'&&this.mode==='discover';
+  const filtered=this.filteredItems();
+  const totalPages=Math.max(1,Math.ceil(filtered.length/this.pageSize));
+  this.page=Math.min(this.page,totalPages-1);
+  const visible=paginated
+    ?filtered.slice(this.page*this.pageSize,(this.page+1)*this.pageSize)
+    :this.mode==='discover'?container.items:this.choices.length?this.choices:container.items;
+  $('inventory-items').replaceChildren(...visible.map(item=>{
    const out=this.isOut(container.id,item.id);
    const button=document.createElement('button');
    button.type='button';
    button.className='inventory-item'+(out?' is-out':'');
    button.dataset.itemId=item.id;
-   const img=document.createElement('img');
-   img.src=asset(item);img.alt=item.en;img.loading='eager';
+   let art;
+   if(Number.isInteger(item.spriteIndex)){
+     art=document.createElement('span');
+     art.className='inventory-pixel-sprite';
+     art.setAttribute('role','img');
+     art.setAttribute('aria-label',item.en);
+     const col=item.spriteIndex%7,row=Math.floor(item.spriteIndex/7);
+     art.style.backgroundImage='url("'+asset(item)+'")';
+     art.style.backgroundSize=(7*64)+'px '+(5*64)+'px';
+     art.style.backgroundPosition=(-col*64)+'px '+(-row*64)+'px';
+   }else{
+     art=document.createElement('img');
+     art.src=asset(item);art.alt=item.en;art.loading='eager';
+   }
    const label=document.createElement('strong');label.textContent=item.en;
    const state=document.createElement('small');state.textContent=out?'FUERA':'DENTRO';
-   button.append(img,label,state);
+   button.append(art,label,state);
    button.onclick=()=>this.select(item);
    return button;
   }));
   $('inventory-count').textContent=container.items.filter(i=>!this.isOut(container.id,i.id)).length+
     ' guardados · '+container.items.filter(i=>this.isOut(container.id,i.id)).length+' fuera';
+  if(paginated){
+    $('inventory-page').textContent='Página '+(this.page+1)+' de '+totalPages;
+    $('inventory-prev').disabled=this.page===0;
+    $('inventory-next-page').disabled=this.page>=totalPages-1;
+  }
  }
  select(item){
   if(!this.current||this.locked)return;

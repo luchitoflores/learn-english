@@ -1,5 +1,6 @@
 // One reusable, data-driven inventory system for every Word Quest room.
 // Illustrated inventory art is original, generated for this project and stored locally.
+import { FRIDGE_SPRITES } from './fridge-sprites.js';
 const I=(id,en,es,image,plural=false)=>({id,en,es,image,plural});
 const inv=name=>'inventory/'+name+'.webp';
 const prop=name=>'objects/'+name+'.webp';
@@ -8,9 +9,9 @@ export const CONTAINERS={
   id:'fridge',room:'kitchen',name:'Refrigeradora',en:'Fridge',es:'refrigeradora',kind:'food',
   items:[
    I('eggs','eggs','huevos',inv('eggs'),true),I('milk','milk','leche',inv('milk')),
-   I('cheese','cheese','queso',inv('cheese')),I('apple','apple','manzana',prop('apple')),
-   I('juice','juice','jugo',inv('juice')),I('yogurt','yogurt','yogur',inv('yogurt')),
-   I('butter','butter','mantequilla',inv('butter')),I('lettuce','lettuce','lechuga',inv('lettuce'))],
+   I('cheese','cheese','queso',inv('cheese')),I('juice','juice','jugo',inv('juice')),
+   I('yogurt','yogurt','yogur',inv('yogurt')),I('butter','butter','mantequilla',inv('butter')),
+   ...FRIDGE_SPRITES],
   verbs:{out:['Take out the {item}.','Saca {es}.'],back:['Put the {item} back.','Vuelve a guardar {es}.']}
  },
  toolbox:{

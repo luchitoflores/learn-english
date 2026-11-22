@@ -110,3 +110,40 @@
  .inventory-item img{height:49px}
  .inventory-head h2{font-size:19px}
 }
+
+
+/* User-supplied 48×48 fruit and vegetable sprites, nearest-neighbor enlargement */
+.inventory-pixel-sprite{
+  display:block;
+  flex:none;
+  width:64px;height:64px;
+  background-repeat:no-repeat;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+}
+.inventory-filters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.inventory-filters.hidden,.inventory-pager.hidden{display:none}
+.inventory-filter{
+  border:1px solid #ffe0a3a8;
+  border-radius:999px;
+  background:#273955;
+  color:#f9e9cd;
+  min-height:35px;
+  padding:5px 10px;
+  font-size:12px;
+  font-weight:750;
+  touch-action:manipulation;
+}
+.inventory-filter.active{background:#e1b66b;color:#252940;border-color:#fff5cc}
+.inventory-pager{display:flex;align-items:center;justify-content:center;gap:15px;font-size:12px;font-weight:800;color:#f1dfbd}
+.inventory-pager button{
+  background:#3d5075;
+  border:1px solid #c5bcbe;
+  color:#fff1d7;
+  border-radius:11px;
+  min-width:47px;min-height:38px;
+}
+.inventory-pager button:disabled{opacity:.32}
+@media(max-width:760px){
+  .inventory-filter{font-size:11px;min-height:33px;padding:5px 8px}
+}

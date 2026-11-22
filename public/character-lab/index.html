@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#171d32">
-<title>Word Quest · Taller de personaje modular</title>
+<title>Word Quest · Estudio de avatares y acciones</title>
 <style>
 *{box-sizing:border-box}
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff4e5;background:#131a2b;--skin:#e6b484;--skin-shadow:#bb805e;--hair:#473349;--shirt:#579a9a;--shirt-shadow:#327578;--pants:#465f8d;--shoes:#302c42}
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff4e5;background:#131a2b;--skin:#e6b484;--skin-shadow:#bb805e;--hair:#8a8e99;--beard:#707883;--shirt:#a65749;--shirt-shadow:#783d3d;--pants:#465f8d;--shoes:#302c42}
 body{margin:0;background:radial-gradient(circle at 20% 10%,#3b3b5d 0%,#1a2138 58%,#131a2b 100%);min-height:100dvh}
 header{max-width:1020px;margin:auto;padding:19px 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:14px}
 h1{font-size:clamp(20px,4vw,28px);line-height:1.15;margin:0}
@@ -32,9 +32,11 @@ button,select{font:inherit}
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .controls label{font-size:12px;color:#cbd2df;display:grid;gap:5px}
 .controls select{width:100%;min-height:41px;border:1px solid #8e95ac;background:#1c253b;color:#fff1e4;border-radius:9px;padding:7px}
-.note{font-size:12px;line-height:1.6;color:#c3c8d7;margin-top:13px;border-top:1px solid #ffffff26;padding-top:13px}
+.grammar{padding:11px 13px;margin-top:10px;border-radius:12px;background:#151d34;border:1px solid #c9a37a55;font-size:14px;line-height:1.5;color:#f8ddb4}.grammar b{color:#fff1d9}.note{font-size:12px;line-height:1.6;color:#c3c8d7;margin-top:13px;border-top:1px solid #ffffff26;padding-top:13px}
 footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:12px}
-#char{transform-origin:210px 350px}
+#char{transform-origin:210px 350px;transform:scale(1.035)}
+.stage.bare #armNormal path:first-child,.stage.bare #armBack path:nth-child(2),.stage.bare #armWorking path:first-child{stroke:var(--skin) !important}
+.stage .grammar{font-size:12px}
 #legs g{transform-box:fill-box}
 .stage.walk #legFront{animation:front-step .55s ease-in-out infinite alternate}
 .stage.walk #legBack{animation:back-step .55s ease-in-out infinite alternate}
@@ -48,10 +50,16 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
 @keyframes tremble{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
 @keyframes care-motion{from{transform:translateY(-4px)}to{transform:translateY(5px)}}
 @media(max-width:700px){main{grid-template-columns:1fr;gap:11px}.stage{min-height:355px}.stage svg{height:355px;max-width:100%}.card{padding:12px}.actions button{min-height:54px}}
+
+.actions button[hidden]{display:none}
+#bareTorso{filter:drop-shadow(1px 2px 2px #3b243655)}
+#beard{transition:opacity .25s}
+.stage.shirt #shirtLayer,.stage.suit #suitLayer{animation:wear .5s ease-out}
+@keyframes wear{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
-<header><div><span>WORD QUEST · ART LAB 0.1</span><h1>Personaje modular propio</h1></div><a href="../">← Volver al juego</a></header>
+<header><div><span>WORD QUEST · AVATAR STUDIO 0.2</span><h1>Editor de personaje y acciones</h1></div><a href="../">← Volver al juego</a></header>
 <main>
 <section class="card">
   <div id="stage" class="stage">
@@ -84,21 +92,32 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
         </g>
         <!-- Torso and jacket are independent parts -->
         <g id="torso">
-          <path d="M173 216 Q154 222 151 256 L160 317 Q190 336 257 318 L266 260 Q266 232 244 218Z" fill="var(--shirt)" stroke="#3c4259" stroke-width="4"/>
+          <path id="bareTorso" d="M169 214 Q139 223 137 257 L145 324 Q201 344 272 323 L278 252 Q277 221 247 213Z" fill="var(--skin)" stroke="#785b5c" stroke-width="4"/>
+          <g id="shirtLayer"><path d="M169 214 Q139 223 137 257 L145 324 Q201 344 272 323 L278 252 Q277 221 247 213Z" fill="var(--shirt)" stroke="#3c4259" stroke-width="4"/>
           <path d="M174 220 Q210 238 246 220 L257 314 Q201 329 160 313Z" fill="url(#clothLight)" opacity=".85"/>
           <path d="M208 229 L210 318" stroke="#e1ecda" stroke-width="3" opacity=".5"/>
           <circle cx="211" cy="263" r="3" fill="#dfe7e8"/><circle cx="211" cy="286" r="3" fill="#dfe7e8"/>
-          <path d="M168 318 Q204 326 252 317" stroke="#30495f" stroke-width="8" fill="none"/>
+          <path d="M157 318 Q204 332 265 317" stroke="#30495f" stroke-width="8" fill="none"/>
+          </g>
+          <g id="suitLayer" display="none">
+            <path d="M168 214 Q140 221 137 262 L148 329 Q199 344 267 329 L279 258 Q276 222 245 213Z" fill="#303b59" stroke="#24293d" stroke-width="4"/>
+            <path d="M186 220 L207 275 L232 219 L219 317 L201 335 L185 310Z" fill="#f8f3e9"/>
+            <path d="M185 217 L168 234 L193 286 L207 274Z M232 217 L251 236 L226 286 L207 274Z" fill="#526384" stroke="#202b48" stroke-width="2"/>
+            <path d="M207 226 L198 240 L208 250 L218 239Z L211 300 L202 303 L200 254Z" fill="#a6434b"/>
+            <circle cx="225" cy="307" r="3" fill="#d6b888"/>
+          </g>
         </g>
         <g id="neck"><path d="M182 200 L184 231 Q207 246 232 230 L231 194Z" fill="var(--skin-shadow)" stroke="#765c5b" stroke-width="3"/></g>
         <!-- Head, hair and face can change without changing body -->
         <g id="head">
-          <ellipse cx="210" cy="143" rx="65" ry="75" fill="var(--skin)" stroke="#624a56" stroke-width="4"/>
+          <ellipse cx="210" cy="143" rx="69" ry="77" fill="var(--skin)" stroke="#624a56" stroke-width="4"/>
+          <path d="M147 163 Q150 203 176 212 M270 163 Q262 209 237 215" stroke="#bf856a" stroke-width="5" opacity=".35" fill="none"/>
           <ellipse cx="146" cy="160" rx="13" ry="20" fill="var(--skin-shadow)" stroke="#624a56" stroke-width="3"/>
           <path d="M190 201 Q211 215 235 201" stroke="#d0906b" stroke-width="3" fill="none" opacity=".6"/>
           <g id="hairShort">
             <path d="M147 147 Q131 80 174 65 Q214 40 254 70 Q283 88 272 143 L259 110 Q249 90 238 90 Q210 112 188 96 Q169 125 147 119Z" fill="var(--hair)" stroke="#392c40" stroke-width="4"/>
-            <path d="M151 100 Q182 63 218 70" stroke="#ffffff" stroke-opacity=".15" stroke-width="7" fill="none"/>
+            <path d="M151 100 Q182 63 218 70" stroke="#ffffff" stroke-opacity=".40" stroke-width="9" fill="none"/>
+            <path d="M169 87 Q201 60 227 74" stroke="#dfe7ec" stroke-opacity=".48" stroke-width="6" fill="none"/>
           </g>
           <g id="hairLong" display="none">
             <path d="M152 103 Q157 56 215 57 Q280 58 272 145 L283 259 Q249 275 244 244 L247 115 Q211 105 193 92 Q170 137 151 131 L149 247 Q129 257 136 215Z" fill="var(--hair)" stroke="#392c40" stroke-width="4"/>
@@ -114,7 +133,13 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
           <g id="browsNormal"><path d="M174 124 Q183 118 196 124 M220 122 Q232 117 244 123" stroke="#533849" stroke-width="5" fill="none"/></g>
           <g id="browsSad" display="none"><path d="M175 121 L195 128 M220 126 L245 120" stroke="#533849" stroke-width="5" fill="none"/></g>
           <g id="browsRaised" display="none"><path d="M175 116 Q186 109 197 116 M218 114 Q232 106 245 113" stroke="#533849" stroke-width="5" fill="none"/></g>
-          <path d="M208 144 Q201 161 210 165 L218 162" stroke="#a77762" stroke-width="3" fill="none"/>
+          <path d="M208 144 Q198 163 210 168 L220 164" stroke="#a77762" stroke-width="4" fill="none"/>
+          <g id="beard" fill="var(--beard)" stroke="#4b4c59" stroke-width="2">
+            <path d="M153 165 Q153 192 168 207 Q174 229 200 233 Q210 247 225 233 Q252 227 258 204 Q273 186 267 166 Q251 175 244 190 Q236 201 222 198 Q211 209 200 198 Q182 201 171 186 Q164 171 153 165Z"/>
+            <path d="M180 179 Q194 172 207 180 Q224 172 239 179 Q227 192 210 189 Q192 192 180 179Z"/>
+            <path d="M176 204 Q203 226 237 207" fill="none" stroke="#b5b5bc" stroke-opacity=".5" stroke-width="4"/>
+            <path d="M172 196 Q177 218 195 222 M246 195 Q241 218 226 225" fill="none" stroke="#cbd0d4" stroke-opacity=".36" stroke-width="3"/>
+          </g>
           <g id="mouthNeutral"><path d="M193 180 Q210 186 228 179" stroke="#9c5c5b" stroke-width="4" fill="none"/></g>
           <g id="mouthSmile" display="none"><path d="M192 178 Q210 197 230 177" fill="#7b3d55" stroke="#9a5560" stroke-width="3"/><path d="M197 180 Q211 186 225 180" fill="none" stroke="#fff4e8" stroke-width="4"/></g>
           <g id="mouthShout" display="none"><ellipse cx="212" cy="185" rx="16" ry="21" fill="#56283f" stroke="#a45361" stroke-width="3"/><path d="M200 175 Q211 181 224 175" stroke="#fff9ef" stroke-width="5"/></g>
@@ -155,6 +180,7 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
     </svg>
   </div>
   <div class="info"><strong id="phrase">Hello!</strong><span id="meaning">Hola. Prueba una acción para ver cómo cambian las piezas.</span></div>
+  <div class="grammar"><b id="grammar-label">He / His</b><div id="grammar-sentence">He is standing still.</div></div>
 </section>
 <section class="card">
   <h2>Laboratorio de movimientos</h2>
@@ -170,17 +196,25 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
     <button data-action="makeup">🖌 Maquillarse</button>
     <button data-action="nails">✂ Cortar uñas</button>
     <button data-action="smile">🙂 Sonreír</button>
+    <button data-action="shirt">👕 Ponerse camisa</button>
+    <button data-action="suit">👔 Ponerse traje</button>
+    <button data-action="undress">🧥 Quitarse camisa</button>
     <button data-action="rest">↺ Reiniciar</button>
   </div></fieldset>
+  <fieldset><legend>ESPACIO Y PERSONAJES</legend><div class="controls">
+      <label>Zona<select id="context"><option value="all">Todas las acciones</option><option value="mirror">Espejo: rostro y cuidado</option><option value="wardrobe">Ropero: vestirse y cambiar ropa</option></select></label>
+      <label>Quién realiza la acción<select id="actor"><option value="he">Él · He</option><option value="she">Ella · She</option><option value="they">Ellos · They</option></select></label>
+    </div></fieldset>
   <fieldset><legend>APARIENCIAS INDEPENDIENTES</legend>
     <div class="controls">
-      <label>Ropa<select id="outfit"><option value="teal">Turquesa</option><option value="purple">Morado</option><option value="orange">Coral</option></select></label>
+      <label>Color de la ropa<select id="outfit"><option value="brick">Terracota</option><option value="teal">Turquesa</option><option value="purple">Morado</option><option value="orange">Coral</option></select></label>
       <label>Cabello<select id="hair"><option value="short">Corto</option><option value="long">Largo</option></select></label>
-      <label>Color de cabello<select id="hairColor"><option value="brown">Castaño</option><option value="black">Negro</option><option value="blonde">Rubio</option></select></label>
+      <label>Color de cabello<select id="hairColor"><option value="silver">Plateado</option><option value="brown">Castaño</option><option value="black">Negro</option><option value="blonde">Rubio</option></select></label>
       <label>Tono de piel<select id="skin"><option value="medium">Medio</option><option value="light">Claro</option><option value="dark">Oscuro</option></select></label>
+      <label>Barba<select id="beardStyle"><option value="full">Barba completa</option><option value="none">Sin barba</option></select></label>
     </div>
   </fieldset>
-  <p class="note">Prueba original gratuita, sin Spine ni assets de terceros. Los ojos, cejas, boca, lágrimas, cabello, cuerpo, brazos, piernas y accesorios son <strong>piezas vectoriales independientes</strong>. Este es un prototipo del sistema modular; aún no sustituye al personaje dentro de las habitaciones de Phaser.</p>
+  <p class="note">Prototipo gratuito con diseño original, sin Spine ni assets de terceros. El personaje maduro tiene piezas vectoriales independientes para ojos, cejas, boca, barba, cabello, torso, brazos y piernas. Los cambios de vestuario y el uso de <b>he, she, they, his, her y their</b> son demostraciones educativas. Para un personaje final de calidad 3D caricaturesca necesitaremos arte más detallado. Esta prueba todavía no sustituye al protagonista del juego principal.</p>
 </section>
 </main>
 <footer>Word Quest Character Lab · Prototipo ilustrado en SVG/CSS/JavaScript · Fuente editable dentro del repositorio.</footer>
@@ -206,12 +240,39 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
     makeup:['Put on makeup.','Maquíllate.'],
     nails:['Cut your nails.','Córtate las uñas.'],
     smile:['Smile.','Sonríe.'],
+    shirt:['Put on your shirt.','Ponte la camisa.'],
+    suit:['Put on your suit.','Ponte el traje.'],
+    undress:['Take off your shirt.','Quítate la camisa.'],
     rest:['Stand still.','Quédate quieto.']
   };
   let blinkTimer=null;
+  let currentAction='idle';
+  let outfitState='shirt';
+  const thirdPerson={idle:'standing still',walk:'walking around',wave:'waving',blink:'blinking',shout:'shouting',cry:'crying',brush:'brushing',shave:'shaving',makeup:'putting on',nails:'cutting',smile:'smiling',shirt:'putting on',suit:'putting on',undress:'taking off',rest:'standing still'};
+  const objectText={brush:'teeth',shave:'face',makeup:'makeup',nails:'nails',shirt:'shirt',suit:'suit',undress:'shirt'};
+  function updateGrammar(){
+    const who=$('actor').value;
+    const pronouns={he:['He','his','is','He / His'],she:['She','her','is','She / Her'],they:['They','their','are','They / Their']}[who];
+    const [subject,possessive,aux,label]=pronouns;
+    const verb=thirdPerson[currentAction]||'standing still';
+    const obj=objectText[currentAction];
+    const suffix=obj?(' '+(['makeup'].includes(currentAction)?'':possessive+' ')+obj):'';
+    $('grammar-label').textContent=label;
+    $('grammar-sentence').textContent=`${subject} ${aux} ${verb}${suffix}.`;
+  }
+  function applyWardrobe(){
+    $('shirtLayer').setAttribute('display',outfitState==='shirt'?'inline':'none');
+    $('suitLayer').setAttribute('display',outfitState==='suit'?'inline':'none');
+    stage.classList.toggle('bare',outfitState==='none');
+  }
   function action(name){
     clearTimeout(blinkTimer);
+    currentAction=name;
     stage.className='stage '+(name==='rest'?'idle':name);
+    if(name==='shirt')outfitState='shirt';
+    if(name==='suit')outfitState='suit';
+    if(name==='undress')outfitState='none';
+    applyWardrobe();
     hide([...eyes,...eyebrows,...mouths,...props,'tears','armWorking']);
     show('eyesOpen');show('browsNormal');show('mouthNeutral');show('armNormal');
     if(['brush','shave','makeup','nails'].includes(name)){
@@ -230,18 +291,44 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
     }
     if(name==='smile'){hide(['mouthNeutral']);show('mouthSmile')}
     $('phrase').textContent=sayings[name][0];$('meaning').textContent=sayings[name][1];
+    updateGrammar();
     document.querySelectorAll('[data-action]').forEach(b=>b.classList.toggle('active',b.dataset.action===name));
   }
   document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>action(b.dataset.action)));
   const palettes={
-    outfit:{teal:['#579a9a','#327578'],purple:['#9c77b7','#6d4d91'],orange:['#db8a68','#9e5b53']},
+    outfit:{brick:['#a65749','#783d3d'],teal:['#579a9a','#327578'],purple:['#9c77b7','#6d4d91'],orange:['#db8a68','#9e5b53']},
     skin:{medium:['#e6b484','#bb805e'],light:['#f4d6b7','#d5a27e'],dark:['#9a654e','#754736']},
-    hairColor:{brown:'#473349',black:'#222837',blonde:'#9c6c43'}
+    hairColor:{silver:'#8a8e99',brown:'#473349',black:'#222837',blonde:'#9c6c43'}
   };
   $('outfit').onchange=e=>{document.documentElement.style.setProperty('--shirt',palettes.outfit[e.target.value][0]);document.documentElement.style.setProperty('--shirt-shadow',palettes.outfit[e.target.value][1])};
   $('skin').onchange=e=>{document.documentElement.style.setProperty('--skin',palettes.skin[e.target.value][0]);document.documentElement.style.setProperty('--skin-shadow',palettes.skin[e.target.value][1])};
   $('hairColor').onchange=e=>document.documentElement.style.setProperty('--hair',palettes.hairColor[e.target.value]);
   $('hair').onchange=e=>{hide(['hairShort','hairLong']);show(e.target.value==='short'?'hairShort':'hairLong')};
+  $('beardStyle').onchange=()=>{ $('beard').setAttribute('display',$('beardStyle').value==='full'?'inline':'none') };
+  $('actor').onchange=()=>{
+    if($('actor').value==='she'){
+      $('hair').value='long';$('hair').onchange({target:$('hair')});
+      $('beardStyle').value='none';$('beardStyle').onchange();
+    } else if($('actor').value==='he'){
+      $('hair').value='short';$('hair').onchange({target:$('hair')});
+      $('beardStyle').value='full';$('beardStyle').onchange();
+    }
+    updateGrammar();
+  };
+  $('context').onchange=()=>{
+    const zone=$('context').value;
+    const sets={mirror:['idle','blink','shout','cry','brush','shave','makeup','nails','smile'],wardrobe:['idle','shirt','suit','undress']};
+    document.querySelectorAll('[data-action]').forEach(button=>{
+      button.hidden=zone!=='all'&&!sets[zone].includes(button.dataset.action);
+    });
+    action('idle');
+  };
+  const saved=localStorage.getItem('wq-avatar-demo-v2');
+  if(saved){try{const c=JSON.parse(saved);if(c.outfit)$('outfit').value=c.outfit;if(c.hairColor)$('hairColor').value=c.hairColor;if(c.skin)$('skin').value=c.skin;}catch{}}
+  for(const id of ['outfit','hairColor','skin']){
+    $(id).dispatchEvent(new Event('change'));
+    $(id).addEventListener('change',()=>localStorage.setItem('wq-avatar-demo-v2',JSON.stringify({outfit:$('outfit').value,hairColor:$('hairColor').value,skin:$('skin').value})));
+  }
   action('idle');
 })();
 </script>

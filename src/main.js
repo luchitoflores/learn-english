@@ -7,6 +7,8 @@ import { loadProgress,saveProgress } from './core/storage.js';
 import { speak,repeatSpeech } from './core/audio.js';
 import { validateRooms } from './core/validator.js';
 import { AvatarFactory, getAvatarProfile, saveAvatarProfile } from './core/AvatarFactory.js';
+import { ContainerEngine } from './core/ContainerEngine.js';
+import { containerForObject, roomContainers } from './data/containers.js';
 import './style.css';
 
 const $=id=>document.getElementById(id);
@@ -19,6 +21,7 @@ class GameApp {
     this.roomId=this.progress.room||'bedroom';if(!ROOMS[this.roomId])this.roomId='bedroom';
     this.modeEngine=new ModeEngine(this);this.editorActive=false;this.movement=0;this.entryX=null;this.lastStudy=null;
     this.avatar=getAvatarProfile();this.avatarFactory=null;
+    this.containers=new ContainerEngine(this);
     this.initEvents();this.drawModes();this.drawProgress();this.setupPhaser();
   }
   get room(){return this.getRoom(this.roomId)}
@@ -62,6 +65,7 @@ class GameApp {
     $('room-name').textContent=this.room.name;
     $('location-tag').innerHTML=this.room.name.toUpperCase()+' <span> · EXPLORE</span>';
     this.drawRoomExits();
+    this.drawContainerShortcuts();
     this.refreshAvatarPortrait();
     this.modeEngine.onRoomChange();
     this.toast(`Llegaste a ${this.room.name}. Toca un objeto para escuchar su nombre.`);
@@ -80,6 +84,7 @@ class GameApp {
       return false;
     }
     this.modeEngine.cancelPending();
+    this.containers.close(false);
     this.movement=0;
     this.closeActionPanel();this.closeModal();
     // Update the artwork and hitboxes first; only announce a room change
@@ -112,6 +117,36 @@ class GameApp {
       return button;
     }));
   }
+  drawContainerShortcuts(){
+    const root=$('container-shortcuts');
+    root.replaceChildren(...roomContainers(this.roomId).map(c=>{
+      const button=h('button',{
+        type:'button',className:'container-shortcut',
+        textContent:'▣ '+c.en
+      });
+      button.title='Abrir '+c.name;
+      button.onclick=e=>{e.preventDefault();e.stopPropagation();this.openContainer(c.id)};
+      return button;
+    }));
+  }
+  async openContainer(id){
+    const config=containerForObject(id);
+    if(!config||config.room!==this.roomId)return false;
+    if(this.containers.present)return true;
+    const scene=this.scene;
+    if(!scene?.sys.isActive()||scene.busy||scene.isLeaving){
+      this.toast('Termina el movimiento actual antes de abrir.');
+      return false;
+    }
+    const roomAtStart=this.roomId;
+    const obj=this.room.objects.find(o=>o.id===id);
+    if(obj){
+      const target=Math.min(1175,Math.max(90,obj.x+(obj.x<scene.hero.x?90:-90)));
+      const arrived=await scene.walkTo(target);
+      if(!arrived||this.roomId!==roomAtStart)return false;
+    }
+    return this.containers.open(id);
+  }
   drawModes(){
     $('mode-dock').replaceChildren(...MODES.map(mode=>{
       const b=h('button',{className:mode.id===this.modeEngine.mode?'active':'',title:mode.help});
@@ -128,6 +163,10 @@ class GameApp {
     $('statline').textContent=`${p.correct} actividades correctas · ${p.streak} racha`;
   }
   selectObject(object){
+    if(containerForObject(object.id)){
+      this.openContainer(object.id);
+      return;
+    }
     this.selected={object,phrase:null};
     this.showStudy(object.name,object.es,`Objeto de ${this.room.name} · Elige una acción.`);
     $('action-name').textContent=object.name;
@@ -213,7 +252,7 @@ class GameApp {
     $('editor-close-bg').onclick=$('editor-close').onclick=()=>this.closeEditor();
     document.addEventListener('keydown',e=>{
       if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='e'){e.preventDefault();this.toggleEditor()}
-      if(e.key==='Escape'){this.closeActionPanel();this.closeModal();this.closeEditor()}
+      if(e.key==='Escape'){this.containers.close();this.closeActionPanel();this.closeModal();this.closeEditor()}
     });
     const bindHold=(button,value)=>{
       const el=$(button);

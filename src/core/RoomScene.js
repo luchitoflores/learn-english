@@ -12,6 +12,8 @@ export class RoomScene extends Phaser.Scene {
     // All props use AI-rendered transparent raster images instead of flat SVG illustrations.
     for(const key of ['lamp','book','backpack','jacket','shoes','phone','pillow','cup','apple','kettle','plate','spoon','towel','remote','plant','keys','trash','picture','ball','mirror'])
       this.load.image(`obj-${key}`,`${prefix}objects/${key}.webp`);
+    this.load.image('obj-toolbox',`${prefix}inventory/toolbox-container.webp`);
+    this.load.image('obj-medkit',`${prefix}inventory/bandage.webp`);
     for(const key of ['idle','walk1','walk2','crouch','reach','grab','sit','hold','use'])
       this.load.image(`hero-${key}`,`${prefix}hero/${key}.png`);
     this.controller.avatarFactory?.queueTextures(this.load,this.controller.avatar);
@@ -31,7 +33,8 @@ export class RoomScene extends Phaser.Scene {
     const desiredKey=this.controller.avatarFactory?.profileKey(this.controller.avatar)||'hero-idle';
     const avatarKey=this.textures.exists(desiredKey)?desiredKey:'hero-idle';
     this.hero=this.add.sprite(startX,631,avatarKey).setOrigin(.5,1)
-      .setDisplaySize(avatarKey==='hero-idle'?126:95,avatarKey==='hero-idle'?160:205).setDepth(14);
+      .setDisplaySize(avatarKey==='hero-side-walk'?160:avatarKey==='hero-idle'?126:95,
+        avatarKey==='hero-idle'?160:205).setDepth(14);
     this.hero.setInteractive({useHandCursor:true});
     this.hero.on('pointerdown',()=>this.controller.toast('Toca un objeto para descubrir acciones.'));
     this.character=new CharacterAnimator(this,this.hero,this.controller.makeAvatarProfile()||undefined);
@@ -99,7 +102,7 @@ export class RoomScene extends Phaser.Scene {
     const key=this.controller.avatarFactory.profileKey(this.controller.avatar);
     if(!this.textures.exists(key))return;
     this.character.setSkin(this.controller.makeAvatarProfile());
-    this.hero.setDisplaySize(95,205);
+    this.hero.setDisplaySize(key==='hero-side-walk'?160:95,205);
     this.character.rest(this.room.objects.some(o=>o.state.held));
     this.updateHand();
   }

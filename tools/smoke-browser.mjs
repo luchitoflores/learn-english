@@ -30,7 +30,16 @@ try {
   }));
   assert(state.width>200&&state.height>150,'Canvas missing or too small: '+JSON.stringify(state));
   assert.equal(state.background,'room-'+state.room);
-  assert(state.hero.startsWith('hero-raster-'),'The old placeholder character is visible');
+  assert(state.hero==='hero-side-walk'||state.hero.startsWith('hero-raster-'),'Character texture missing: '+state.hero);
+  // Exercise the actual frame-based sideways walk, not a sliding still image.
+  await page.evaluate(()=>{window.wordQuest.movement=1});
+  await page.waitForTimeout(250);
+  const walking=await page.evaluate(()=>({
+    key:window.wordQuest.scene.hero.anims.currentAnim?.key,
+    playing:window.wordQuest.scene.hero.anims.isPlaying
+  }));
+  await page.evaluate(()=>{window.wordQuest.movement=0});
+  assert(walking.playing&&walking.key?.includes('walk'),'Side walk animation failed: '+JSON.stringify(walking));
   const shot=await page.locator('#game canvas').screenshot({path:artifacts+'/bedroom-mobile.png'});
   const png=PNG.sync.read(shot);
   const distinct=new Set();
@@ -47,6 +56,16 @@ try {
   assert.equal(next.background,'room-living','Room background did not change');
   assert(next.objects>0,'Room objects did not repopulate');
   await page.locator('#game canvas').screenshot({path:artifacts+'/living-mobile.png'});
+  const toolbox=page.locator('#container-shortcuts button',{hasText:'Toolbox'});
+  assert(await toolbox.isVisible(),'Toolbox shortcut missing');
+  await toolbox.click();
+  await page.waitForFunction(()=>window.wordQuest?.containers?.current?.id==='toolbox',null,{timeout:15000});
+  assert.equal(await page.locator('#inventory-items button').count(),8,'Toolbox slots missing');
+  await page.locator('#inventory-items button[data-item-id="hammer"]').click();
+  assert((await page.locator('#study-english').textContent()).includes('hammer'),'Discovery not recorded');
+  await page.locator('#inventory-layer').screenshot({path:artifacts+'/toolbox-mobile.png'});
+  await page.locator('#inventory-close').click();
+  assert(await page.locator('#inventory-layer').evaluate(el=>el.classList.contains('hidden')),'Close failed');
   assert.equal(errors.length,0,'Browser asset or JavaScript errors: '+errors.join(' | '));
   console.log('PASS mobile browser smoke:',state,'next:',next,'canvas colors:',distinct.size);
 } catch(e){ console.error('FAIL browser smoke:',e);process.exitCode=1; }

@@ -17,7 +17,13 @@ export class CharacterAnimator {
     scene.events.once('shutdown', () => this.dispose());
   }
   ensureWalk(){
-    if(!this.scene.anims.exists(this.walkKey)){
+    if(this.scene.anims.exists(this.walkKey))return;
+    const sheet=this.profile.sideSheet;
+    if(sheet&&this.scene.textures.exists(sheet)){
+      this.scene.anims.create({key:this.walkKey,
+        frames:this.scene.anims.generateFrameNumbers(sheet,{frames:[1,2,3,2]}),
+        frameRate:8,repeat:-1});
+    }else{
       this.scene.anims.create({key:this.walkKey,frames:[
         {key:this.keyFor('walkA')},{key:this.keyFor('walkB')}
       ],frameRate:this.profile.movement.walkFrameRate||7,repeat:-1});
@@ -38,7 +44,13 @@ export class CharacterAnimator {
     if (this.disposed || !this.sprite?.active) return;
     this.sprite.stop();
     const key=this.keyFor(pose);
-    if(this.scene.textures.exists(key))this.sprite.setTexture(key);
+    if(this.scene.textures.exists(key)){
+      if(this.profile.sideSheet){
+        const frames={idle:0,walkA:1,walkB:2,crouch:0,reach:3,grab:3,
+          hold:0,use:3,sit:0};
+        this.sprite.setTexture(key,frames[pose]??0);
+      }else this.sprite.setTexture(key);
+    }
     this.sprite.setAngle(pose==='reach'?-7:pose==='use'?6:pose==='crouch'?2:0);
   }
   walk() {

@@ -22,17 +22,24 @@ export class AvatarFactory {
     if(p?.outfit==='formal')return 'suit';
     return p?.beard==='none'?'shaved':'beard';
   }
-  profileKey(p){return ART[this.visualName(p)]}
+  profileKey(p){
+    // The side-view walk cycle is available for the casual bearded explorer.
+    return this.visualName(p)==='beard'?'hero-side-walk':ART[this.visualName(p)];
+  }
   expressionKey(p){return this.profileKey(p)}
   characterProfile(p){
     const key=this.profileKey(p);
-    return {id:'raster-'+key,imagePrefix:'',poses:{
-      idle:key,walkA:key,walkB:key,crouch:key,reach:key,
-      grab:key,sit:key,hold:key,use:key
-    },movement:{walkFrameRate:6,walkSpeed:.31}};
+    return {id:'raster-'+key,imagePrefix:'',sideSheet:key==='hero-side-walk'?key:null,
+      poses:{idle:key,walkA:key,walkB:key,crouch:key,reach:key,
+        grab:key,sit:key,hold:key,use:key},
+      movement:{walkFrameRate:8,walkSpeed:.31}};
   }
   uri(p){return this.base+'assets/hero/'+this.visualName(p)+'.webp'}
   queueTextures(loader){
+    if(!loader.scene.textures.exists('hero-side-walk')){
+      loader.spritesheet('hero-side-walk',this.base+'assets/hero/side-walk.webp',
+        {frameWidth:160,frameHeight:190});
+    }
     for(const [filename,key] of Object.entries(ART)){
       if(!loader.scene.textures.exists(key)){
         loader.image(key,this.base+'assets/hero/'+filename+'.webp');

@@ -15,6 +15,7 @@
       <div class="stage-shine"></div>
       <div class="location-tag" id="location-tag">EL DORMITORIO <span> · EXPLORE</span></div>
       <nav id="room-exits" class="room-exits" aria-label="Puertas y habitaciones conectadas"></nav>
+      <nav id="container-shortcuts" class="container-shortcuts" aria-label="Contenedores de esta habitación"></nav>
       <div id="status" class="status" role="status"></div>
       <div class="movement-controls"><button id="move-left" aria-label="Caminar a la izquierda">◀</button><button id="move-right" aria-label="Caminar a la derecha">▶</button></div>
       <div class="stage-note">Toca un objeto para interactuar · A / D para caminar</div>
@@ -44,6 +45,28 @@
 <div id="station-tools" class="station-tools hidden"></div>
 <p>Elige una acción. Tu personaje se acercará y la realizará.</p><div id="action-list"></div>
 </div></div>
+<div id="inventory-layer" class="inventory-layer hidden" role="dialog" aria-modal="true" aria-label="Contenido del contenedor">
+  <div class="inventory-scrim" id="inventory-scrim"></div>
+  <section class="inventory-panel">
+    <header class="inventory-head">
+      <div>
+        <small class="inventory-eyebrow">WORD QUEST · INVENTARIO INTERACTIVO</small>
+        <h2 id="inventory-title">Refrigeradora</h2>
+        <span id="inventory-subtitle">Fridge</span>
+      </div>
+      <button id="inventory-close" type="button" aria-label="Cerrar inventario">✕</button>
+    </header>
+    <div class="inventory-meta"><span id="inventory-mode">Descubrimiento</span><span id="inventory-score">0 aciertos</span></div>
+    <div class="inventory-order">
+      <button id="inventory-replay" type="button" aria-label="Repetir orden en inglés">♫</button>
+      <div><strong id="inventory-prompt">Explore the objects.</strong><small id="inventory-translation">Explora los objetos.</small></div>
+    </div>
+    <div id="inventory-items" class="inventory-items" role="group" aria-label="Objetos disponibles"></div>
+    <p class="inventory-count" id="inventory-count"></p>
+    <div class="inventory-feedback" id="inventory-result" role="status" aria-live="polite"></div>
+    <button id="inventory-next" class="inventory-next" type="button">Otra orden</button>
+  </section>
+</div>
 <div id="modal-layer" class="hidden modal-layer"><div class="scrim" id="close-modal"></div><div class="modal-card"><div class="modal-heading"><div class="eyebrow">EXPLORA</div><h2 id="modal-title">Mapa de la casa</h2></div><button id="modal-x">✕</button><div id="modal-content"></div></div></div>
 <div id="editor-layer" class="hidden modal-layer"><div class="scrim" id="editor-close-bg"></div><div class="modal-card editor-card"><div class="modal-heading"><div class="eyebrow">MODO ADMINISTRADOR · CTRL+MAYÚS+E</div><h2>Editor de contenido y posiciones</h2></div><button id="editor-close">✕</button>
 <p>Puedes modificar las definiciones JSON, exportarlas o importar un archivo. En el editor puedes arrastrar objetos en el escenario. No sustituye a un editor gráfico avanzado.</p>

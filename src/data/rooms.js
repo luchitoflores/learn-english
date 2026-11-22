@@ -80,6 +80,10 @@ export const ROOMS = {
     id:'kitchen',name:'Cocina',en:'Kitchen', subtitle:'Prepara, recoge y organiza.',
     background:'kitchen',exits:[{to:'living',x:24,y:463,label:'Sala'}],
     objects:[
+      O('medkit','medkit','medicine cabinet','botiquín',635,548,112,[
+        ['open_up','Open the medicine cabinet.','Abre el botiquín.','A2'],
+        ['close','Close the medicine cabinet.','Cierra el botiquín.','A2'],
+        ['look_for','Look for a bandage.','Busca una venda.','A2']]),
       O('kettle','kettle','kettle','hervidor',106,384,94,[
         ['turn_on','Turn on the kettle.','Enciende el hervidor.','A2'],
         ['turn_off','Turn off the kettle.','Apaga el hervidor.','A2'],
@@ -124,6 +128,10 @@ export const ROOMS = {
     id:'living',name:'Sala',en:'Living room',subtitle:'Relájate, observa y juega.',
     background:'living',exits:[{to:'bedroom',x:22,y:458,label:'Dormitorio'},{to:'kitchen',x:1240,y:458,label:'Cocina'}],
     objects:[
+      O('toolbox','toolbox','toolbox','caja de herramientas',1070,613,103,[
+        ['open_up','Open the toolbox.','Abre la caja de herramientas.','A2'],
+        ['close','Close the toolbox.','Cierra la caja de herramientas.','A2'],
+        ['look_for','Look for the hammer.','Busca el martillo.','A2']]),
       O('tv','remote','TV','televisión',1128,333,97,[
         ['turn_on','Turn on the TV.','Enciende la televisión.','A1'],
         ['turn_off','Turn off the TV.','Apaga la televisión.','A1'],

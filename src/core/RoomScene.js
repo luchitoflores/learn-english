@@ -33,11 +33,47 @@ export class RoomScene extends Phaser.Scene {
     this.updateHand();
     this.drawDoors();
     this.input.on('pointerdown',(pointer,targets)=>{
-      if(targets.length||this.controller.editorActive||this.busy)return;
-      if(pointer.y>=590 && pointer.y<690)this.walkTo(Phaser.Math.Clamp(pointer.x,75,1200));
+      if(targets.length||this.controller.editorActive||this.busy||this.isLeaving)return;
+      // Touch coordinates are viewport pixels, not world coordinates, when
+      // the mobile camera zooms and follows the character.
+      const ground=this.cameras.main.getWorldPoint(pointer.x,pointer.y);
+      if(ground.y>=530 && ground.y<=719)this.walkTo(Phaser.Math.Clamp(ground.x,75,1200));
     });
     this.keys=this.input.keyboard.addKeys('A,D,LEFT,RIGHT');
+    this.configureCamera(true);
+    this.scale.on('resize',this.configureCamera,this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{
+      this.scale.off('resize',this.configureCamera,this);
+    });
     this.controller.onRoomReady(this);
+  }
+  configureCamera(immediate=true){
+    if(!this.hero?.active)return;
+    const camera=this.cameras.main;
+    const width=this.scale.width||this.game.canvas.width;
+    const height=this.scale.height||this.game.canvas.height;
+    const mobile=window.matchMedia('(max-width: 760px)').matches;
+    const portrait=window.matchMedia('(orientation: portrait)').matches;
+    // Desktop: see the complete scene. Mobile: show an enlarged slice so
+    // hands, objects and movement remain legible and the camera pans with the hero.
+    const zoom=mobile
+      ? (portrait?Math.max(width/690,height/540):Math.max(width/1100,height/660))
+      : Math.min(width/1280,height/720);
+    camera.setSize(width,height);
+    camera.setZoom(Phaser.Math.Clamp(zoom,.30,2.5));
+    camera.setBounds(0,0,1280,720);
+    this.followCharacter(immediate);
+  }
+  followCharacter(immediate=false){
+    if(!this.hero?.active)return;
+    const camera=this.cameras.main;
+    const viewW=camera.width/camera.zoom;
+    const viewH=camera.height/camera.zoom;
+    const x=Phaser.Math.Clamp(this.hero.x-viewW/2,0,Math.max(0,1280-viewW));
+    // Keep the floor, accessible furniture and doors in the mobile viewport.
+    const y=Phaser.Math.Clamp(505-viewH/2,0,Math.max(0,720-viewH));
+    if(immediate)camera.setScroll(x,y);
+    else camera.setScroll(Phaser.Math.Linear(camera.scrollX,x,.22),Phaser.Math.Linear(camera.scrollY,y,.22));
   }
   createObject(obj){
     let sprite;
@@ -143,7 +179,9 @@ export class RoomScene extends Phaser.Scene {
   async previewAction(obj,phrase){return this.animateAction(obj,phrase,{preview:true})}
   async executeAction(obj,phrase){return this.animateAction(obj,phrase,{preview:false})}
   update(_time,delta){
-    if(!this.hero||this.busy||this.isLeaving||this.controller.editorActive)return;
+    if(!this.hero)return;
+    this.followCharacter();
+    if(this.busy||this.isLeaving||this.controller.editorActive)return;
     const left=this.keys.A.isDown||this.keys.LEFT.isDown||this.controller.movement<0;
     const right=this.keys.D.isDown||this.keys.RIGHT.isDown||this.controller.movement>0;
     if(left||right){

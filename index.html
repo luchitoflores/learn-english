@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#1b2034"/><meta name="description" content="Word Quest: aprende inglés con un personaje en habitaciones 2D interactivas."/>
+<title>Word Quest · Living English</title></head><body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-symbol">✦</span><div><strong>WORD QUEST</strong><small>LIVING ENGLISH · ALPHA 0.1</small></div></div>
+    <div class="room-info"><small id="room-en">BEDROOM</small><strong id="room-name">Dormitorio</strong></div>
+    <div class="progress"><span id="xp">0 XP</span><span class="progress-dot">●</span><span id="mastered">0 descubiertas</span></div>
+    <div class="top-actions"><button id="repeat" title="Repetir pronunciación">♫ <span>Repetir</span></button><button id="reset" title="Restablecer habitación">↻</button><button id="map" class="primary">⌂ <span>Mapa</span></button></div>
+  </header>
+  <main class="game-layout">
+    <section class="stage-shell" id="stage-shell">
+      <div id="game"></div>
+      <div class="stage-shine"></div>
+      <div class="location-tag" id="location-tag">EL DORMITORIO <span> · EXPLORE</span></div>
+      <div id="status" class="status" role="status"></div>
+      <div class="movement-controls"><button id="move-left" aria-label="Caminar a la izquierda">◀</button><button id="move-right" aria-label="Caminar a la derecha">▶</button></div>
+      <div class="stage-note">Toca un objeto para interactuar · A / D para caminar</div>
+    </section>
+    <aside class="mission-panel">
+      <div class="mission-kicker">MISIÓN ACTIVA <span id="timer"></span></div>
+      <h2 id="mission-title">Explora tu habitación</h2>
+      <p id="mission-text">Toca un objeto para comenzar.</p>
+      <div class="mission-tools"><button id="play-order" class="speaker" title="Escuchar">♫ Escuchar</button><button id="new-task">Otra misión ↻</button></div>
+      <div id="answer-options" class="answer-options"></div>
+      <div class="mission-divider"></div>
+      <div class="info-hint" id="info-hint">✦ Explora libremente. Las expresiones se aprenden haciendo acciones.</div>
+      <div class="star-zone"><span>★</span><div><strong>Explorador de palabras</strong><small id="statline">0 expresiones practicadas</small></div></div>
+    </aside>
+  </main>
+  <footer class="mode-dock" id="mode-dock"></footer>
+</div>
+<div id="action-layer" class="hidden action-layer"><div class="scrim" id="close-action"></div><div class="action-card">
+<div class="action-heading"><div><div class="eyebrow">OBJETO INTERACTIVO</div><h3 id="action-name">Book</h3><small id="action-spanish">Libro</small></div><button id="action-x">✕</button></div>
+<p>Elige una acción. Tu personaje se acercará y la realizará.</p><div id="action-list"></div>
+</div></div>
+<div id="modal-layer" class="hidden modal-layer"><div class="scrim" id="close-modal"></div><div class="modal-card"><div class="modal-heading"><div class="eyebrow">EXPLORA</div><h2 id="modal-title">Mapa de la casa</h2></div><button id="modal-x">✕</button><div id="modal-content"></div></div></div>
+<div id="editor-layer" class="hidden modal-layer"><div class="scrim" id="editor-close-bg"></div><div class="modal-card editor-card"><div class="modal-heading"><div class="eyebrow">MODO ADMINISTRADOR · CTRL+MAYÚS+E</div><h2>Editor de contenido y posiciones</h2></div><button id="editor-close">✕</button>
+<p>Puedes modificar las definiciones JSON, exportarlas o importar un archivo. En el editor puedes arrastrar objetos en el escenario. No sustituye a un editor gráfico avanzado.</p>
+<div class="editor-controls"><button id="editor-export">Descargar JSON</button><button id="editor-apply" class="primary">Validar y aplicar</button><label class="import-btn">Importar JSON<input id="editor-file" type="file" accept="application/json" hidden></label></div>
+<textarea id="editor-json" spellcheck="false"></textarea><div id="editor-message"></div></div></div>
+<script type="module" src="/src/main.js"></script></body></html>

@@ -1,0 +1,20 @@
+{
+  "name": "word-quest-living-english",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Parametric 2D educational adventure - 3 rooms and 8 gameplay modes",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build --base=./",
+    "preview": "vite preview --host 0.0.0.0",
+    "validate": "node tools/validate.mjs",
+    "assets": "python tools/generate_assets.py"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.0"
+  }
+}

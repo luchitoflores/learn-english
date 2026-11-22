@@ -6,6 +6,7 @@ import { ModeEngine, MODES } from './core/ModeEngine.js';
 import { loadProgress,saveProgress } from './core/storage.js';
 import { speak,repeatSpeech } from './core/audio.js';
 import { validateRooms } from './core/validator.js';
+import { AvatarFactory, getAvatarProfile, saveAvatarProfile } from './core/AvatarFactory.js';
 import './style.css';
 
 const $=id=>document.getElementById(id);
@@ -17,11 +18,14 @@ class GameApp {
     this.progress=loadProgress();this.custom=loadCustom();this.cache={};this.scene=null;this.selected=null;
     this.roomId=this.progress.room||'bedroom';if(!ROOMS[this.roomId])this.roomId='bedroom';
     this.modeEngine=new ModeEngine(this);this.editorActive=false;this.movement=0;this.entryX=null;this.lastStudy=null;
+    this.avatar=getAvatarProfile();this.avatarFactory=null;
     this.initEvents();this.drawModes();this.drawProgress();this.setupPhaser();
   }
   get room(){return this.getRoom(this.roomId)}
   getRoom(id){if(!this.cache[id])this.cache[id]=cloneRoom(id,this.custom);return this.cache[id]}
-  setupPhaser(){
+  async setupPhaser(){
+    try{this.avatarFactory=await AvatarFactory.load(import.meta.env.BASE_URL)}
+    catch(error){console.warn('Avatar artwork unavailable; using fallback',error);this.avatarFactory=null}
     const viewport=$('game');
     this.game=new Phaser.Game({
       type:Phaser.AUTO,parent:'game',backgroundColor:'#282b44',
@@ -36,12 +40,29 @@ class GameApp {
       callbacks:{postBoot:(game)=>game.scene.add('RoomScene',RoomScene,true,{controller:this,roomId:this.roomId})}
     });
   }
+  makeAvatarProfile(){return this.avatarFactory?.characterProfile(this.avatar)}
+  updateAvatarAppearance(changes){
+    this.avatar=saveAvatarProfile({...this.avatar,...changes});
+    this.scene?.refreshAvatar?.();
+    this.refreshAvatarPortrait();
+  }
+  refreshAvatarPortrait(){
+    const pic=$('avatar-portrait');
+    if(pic&&this.avatarFactory){
+      pic.src=this.avatarFactory.uri(this.avatar,'idle','smile');
+      pic.alt='Personaje '+(this.avatar.beard==='none'?'sin barba':'con barba');
+    }
+  }
+  openAvatarEditor(zone='wardrobe'){
+    window.location.assign(import.meta.env.BASE_URL+'character-lab/?zone='+encodeURIComponent(zone));
+  }
   onRoomReady(scene){
     this.scene=scene;
     $('room-en').textContent=this.room.en.toUpperCase();
     $('room-name').textContent=this.room.name;
     $('location-tag').innerHTML=this.room.name.toUpperCase()+' <span> · EXPLORE</span>';
     this.drawRoomExits();
+    this.refreshAvatarPortrait();
     this.modeEngine.onRoomChange();
     this.toast(`Llegaste a ${this.room.name}. Toca un objeto para escuchar su nombre.`);
   }
@@ -113,6 +134,15 @@ class GameApp {
     $('action-spanish').textContent=object.es;
     const actions=object.phrases.filter(p=>isAvailable(object,p));
     const possible=actions.length?actions:[];
+    const station=object.id==='mirror'?'mirror':object.id==='wardrobe'?'wardrobe':null;
+    $('station-tools').classList.toggle('hidden',!station);
+    $('station-tools').replaceChildren();
+    if(station){
+      const b=h('button',{className:'station-editor-link',
+        textContent:station==='mirror'?'◉ Abrir el espejo y personalizar':'▣ Abrir el ropero y cambiar ropa'});
+      b.onclick=()=>this.openAvatarEditor(station);
+      $('station-tools').append(b);
+    }
     $('action-list').replaceChildren(...possible.map(phrase=>{
       const b=h('button');
       b.append(h('strong',{textContent:phrase.english}),h('small',{textContent:`${phrase.spanish} · ${phrase.level}`}));
@@ -170,6 +200,12 @@ class GameApp {
     $('play-order').onclick=()=>this.modeEngine.mission && speak(this.modeEngine.mission.phrase.english);
     $('study-replay').onclick=()=>this.lastStudy && speak(this.lastStudy.english);
     $('map').onclick=()=>this.showMap();
+    window.addEventListener('pageshow',()=>{
+      const next=getAvatarProfile();
+      if(JSON.stringify(next)!==JSON.stringify(this.avatar)){
+        this.avatar=next;this.scene?.refreshAvatar?.();
+      }
+    });
     $('reset').onclick=()=>this.modeEngine.reset();
     $('new-task').onclick=()=>{if(['sequence','story'].includes(this.modeEngine.mode)){this.modeEngine.createSequence();this.modeEngine.nextSequence()}else this.modeEngine.newMission()};
     $('close-action').onclick=$('action-x').onclick=()=>this.closeActionPanel();

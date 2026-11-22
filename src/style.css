@@ -47,3 +47,12 @@
   #room-exits{top:52px;right:8px}
   #room-exits .room-exit{min-height:52px;min-width:116px;font-size:14px}
 }
+
+
+/* Avatar actions in the bedroom: the editor and Phaser use the same SVG. */
+.station-tools.hidden{display:none}
+.station-tools{margin:8px 0 14px}
+.station-editor-link{width:100%;border:1px solid #e2bc82;border-radius:12px;background:#785871;color:#fff4dc;min-height:52px;font-weight:800;padding:10px}
+.station-avatar{display:none;height:124px;border-radius:12px;background:radial-gradient(circle,#57566b,#242e45);margin-top:10px;overflow:hidden;text-align:center}
+.station-avatar img{height:178px;margin-top:-21px;max-width:100%}
+.action-card:has(.station-tools:not(.hidden)) .station-avatar{display:block}

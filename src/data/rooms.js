@@ -14,6 +14,20 @@ export const ROOMS = {
     id:'bedroom', name:'Dormitorio', en:'Bedroom', subtitle:'Despierta, vístete y explora.',
     background:'bedroom', exits:[{to:'living',x:1225,y:450,label:'Sala'}],
     objects:[
+      O('mirror','picture','mirror','espejo',954,455,125,[
+        ['brush_teeth','Brush your teeth.','Cepíllate los dientes.','A1'],
+        ['shave_face','Shave your beard.','Rasúrate la barba.','A2'],
+        ['smile_face','Smile at the mirror.','Sonríe frente al espejo.','A1'],
+        ['cry_face','Cry.','Llora.','A1'],
+        ['blink_eyes','Blink your eyes.','Parpadea.','A2'],
+        ['shout_face','Shout!','¡Grita!','A1']
+      ],{},true),
+      O('wardrobe','jacket','wardrobe','ropero',1175,530,145,[
+        ['put_on_shirt','Put on your shirt.','Ponte la camisa.','A1'],
+        ['put_on_suit','Put on your suit.','Ponte el traje.','A2'],
+        ['take_off_shirt','Take off your shirt.','Quítate la camisa.','A1'],
+        ['put_on_pajamas','Put on your pajamas.','Ponte el pijama.','A1']
+      ],{},true),
       O('bed','pillow','bed','cama',255,496,130,[
         ['wake_up','Wake up!','¡Despierta!','A1'],['get_up','Get up from bed.','Levántate de la cama.','A1'],
         ['lie_down','Lie down on the bed.','Acuéstate en la cama.','A1'],

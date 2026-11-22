@@ -41,7 +41,17 @@ export const ACTIONS = {
   move_away: rule('walk'),
   come_back: rule('walk'),
   go_out: rule('walk'),
-  come_in: rule('walk')
+  come_in: rule('walk'),
+  brush_teeth: rule('clean',{}, {},1200),
+  shave_face: rule('clean',{}, {},1600),
+  smile_face: rule('look',{}, {},800),
+  cry_face: rule('look',{}, {},1100),
+  blink_eyes: rule('look',{}, {},700),
+  shout_face: rule('look',{}, {},900),
+  put_on_shirt: rule('dress',{}, {},1200),
+  put_on_suit: rule('dress',{}, {},1400),
+  take_off_shirt: rule('dress',{}, {},1200),
+  put_on_pajamas: rule('dress',{}, {},1400)
 };
 
 export function isAvailable(object, phrase) {

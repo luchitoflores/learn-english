@@ -240,7 +240,7 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
     shout:['Shout!','¡Grita!'],
     cry:['Cry.','Llora.'],
     brush:['Brush your teeth.','Cepíllate los dientes.'],
-    shave:['Shave your face.','Rasúrate la cara.'],
+    shave:['Shave your beard.','Rasúrate la barba.'],
     makeup:['Put on makeup.','Maquíllate.'],
     nails:['Cut your nails.','Córtate las uñas.'],
     smile:['Smile.','Sonríe.'],
@@ -348,6 +348,69 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
     setTimeout(()=>URL.revokeObjectURL(a.href),500);
   };
   action('idle');
+})();
+</script>
+<script>
+// Shared local avatar profile; Word Quest loads it on game startup.
+(() => {
+  const $ = id => document.getElementById(id);
+  const KEY = 'wq-avatar-profile-v1';
+  const stage = $('stage');
+  const query = new URLSearchParams(location.search);
+  let lastOutfit = 'casual';
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { saved = null; }
+  if(saved){
+    for(const [id,val] of [
+      ['hair',saved.hair],['hairColor',saved.hairColor],['skin',saved.skin],
+      ['beardStyle',saved.beard],['outfit',saved.shirtColor],['actor',saved.actor]
+    ]){
+      if(val && $(id) && [...$(id).options].some(o=>o.value===val)){
+        $(id).value=val;
+        $(id).dispatchEvent(new Event('change'));
+      }
+    }
+    if(saved.outfit==='formal') document.querySelector('[data-action="suit"]')?.click();
+    else if(saved.outfit==='home') document.querySelector('[data-action="undress"]')?.click();
+    lastOutfit=saved.outfit || 'casual';
+  }
+  const station=query.get('zone');
+  if(station==='mirror'||station==='wardrobe'){
+    $('context').value=station;
+    $('context').dispatchEvent(new Event('change'));
+  }
+  const save=()=>{
+    const outfit=stage.classList.contains('bare')?'home':
+      $('suitLayer').getAttribute('display')!=='none'?'formal':
+      lastOutfit==='pajamas'?'pajamas':'casual';
+    const p={
+      actor:$('actor').value,beard:$('beardStyle').value,
+      outfit,hair:$('hair').value,hairColor:$('hairColor').value,
+      skin:$('skin').value,shirtColor:$('outfit').value
+    };
+    localStorage.setItem(KEY,JSON.stringify(p));
+  };
+  for(const id of ['actor','beardStyle','hair','hairColor','skin','outfit']){
+    $(id).addEventListener('change',save);
+  }
+  $('actions').addEventListener('click', e => {
+    const button=e.target.closest('[data-action]');
+    if(!button)return;
+    const name=button.dataset.action;
+    if(name==='suit')lastOutfit='formal';
+    if(name==='shirt')lastOutfit='casual';
+    if(name==='undress')lastOutfit='home';
+    if(name==='shave'){
+      // Completing a shave visibly changes the character to clean-shaven.
+      setTimeout(()=>{
+        $('beardStyle').value='none';
+        $('beardStyle').dispatchEvent(new Event('change'));
+        save();
+      },550);
+    } else queueMicrotask(save);
+  });
+  $('saveAvatar').addEventListener('click',save);
+  save();
 })();
 </script>
 </body>

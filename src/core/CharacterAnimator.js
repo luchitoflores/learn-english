@@ -13,19 +13,22 @@ export class CharacterAnimator {
     this.animationToken = 0;
     this.disposed = false;
     this.delays = new Set();
-    const animationKey = this.walkKey;
-    if (!scene.anims.exists(animationKey)) {
-      scene.anims.create({
-        key: animationKey,
-        frames: [
-          { key: this.keyFor('walkA') },
-          { key: this.keyFor('walkB') }
-        ],
-        frameRate: profile.movement.walkFrameRate || 7,
-        repeat: -1
-      });
-    }
+    this.ensureWalk();
     scene.events.once('shutdown', () => this.dispose());
+  }
+  ensureWalk(){
+    if(!this.scene.anims.exists(this.walkKey)){
+      this.scene.anims.create({key:this.walkKey,frames:[
+        {key:this.keyFor('walkA')},{key:this.keyFor('walkB')}
+      ],frameRate:this.profile.movement.walkFrameRate||7,repeat:-1});
+    }
+  }
+  setSkin(profile){
+    if(!profile||this.disposed)return;
+    this.sprite.stop();
+    this.profile=profile;
+    this.ensureWalk();
+    this.rest();
   }
   get walkKey() { return `${this.profile.id}-walk`; }
   keyFor(pose) {

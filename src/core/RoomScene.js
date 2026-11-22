@@ -13,6 +13,7 @@ export class RoomScene extends Phaser.Scene {
       this.load.image(`obj-${key}`,`${prefix}objects/${key}.png`);
     for(const key of ['idle','walk1','walk2','crouch','reach','grab','sit','hold','use'])
       this.load.image(`hero-${key}`,`${prefix}hero/${key}.png`);
+    this.controller.avatarFactory?.queueTextures(this.load,this.controller.avatar);
   }
   create(){
     this.cameras.main.setBackgroundColor('#222c45');
@@ -23,12 +24,16 @@ export class RoomScene extends Phaser.Scene {
     }); dust.setDepth(1);
     this.objects=new Map();this.glows=new Map();
     this.room.objects.forEach(obj=>this.createObject(obj));
+    this.stationArt=[];this.drawStations();
     const startX=this.controller.entryX ?? (this.roomId==='bedroom'?513:640);
     this.controller.entryX=null;
-    this.hero=this.add.sprite(startX,631,'hero-idle').setOrigin(.5,1).setDisplaySize(126,160).setDepth(14);
+    const avatarKey=this.controller.avatarFactory
+      ?this.controller.avatarFactory.profileKey(this.controller.avatar,'idle'):'hero-idle';
+    this.hero=this.add.sprite(startX,631,avatarKey).setOrigin(.5,1)
+      .setDisplaySize(this.controller.avatarFactory?136:126,this.controller.avatarFactory?202:160).setDepth(14);
     this.hero.setInteractive(new Phaser.Geom.Rectangle(50,4,120,194),Phaser.Geom.Rectangle.Contains);
     this.hero.on('pointerdown',()=>this.controller.toast('Toca un objeto para descubrir acciones.'));
-    this.character=new CharacterAnimator(this,this.hero);
+    this.character=new CharacterAnimator(this,this.hero,this.controller.makeAvatarProfile()||undefined);
     this.handSprite=this.add.image(startX+29,538,'obj-book').setDisplaySize(42,42).setDepth(16).setVisible(false);
     this.updateHand();
     this.drawDoors();
@@ -74,6 +79,25 @@ export class RoomScene extends Phaser.Scene {
     const y=Phaser.Math.Clamp(505-viewH/2,0,Math.max(0,720-viewH));
     if(immediate)camera.setScroll(x,y);
     else camera.setScroll(Phaser.Math.Linear(camera.scrollX,x,.22),Phaser.Math.Linear(camera.scrollY,y,.22));
+  }
+  drawStations(){
+    if(this.roomId!=='bedroom')return;
+    // The existing wardrobe is at the right; mirror is positioned above the desk.
+    // Both get enlarged interaction hitboxes via passive room objects.
+    const frame=this.add.rectangle(950,372,124,144,0xd3b992,.65).setStrokeStyle(8,0xe8c69d,.92).setDepth(3);
+    const glass=this.add.rectangle(950,372,105,126,0x9bbccd,.5).setDepth(4);
+    const reflection=this.add.triangle(935,346,0,89,36,0,52,0,0xdaf1ef,.25).setDepth(5);
+    const label=this.add.text(950,284,'ESPEJO / MIRROR',{
+      fontFamily:'Arial',fontSize:'15px',fontStyle:'bold',color:'#fff3d6',
+      backgroundColor:'#22283edf',padding:{x:8,y:6}}).setOrigin(.5).setDepth(20);
+    this.stationArt.push(frame,glass,reflection,label);
+  }
+  refreshAvatar(){
+    if(!this.hero?.active||!this.controller.avatarFactory)return;
+    this.character.setSkin(this.controller.makeAvatarProfile());
+    this.hero.setDisplaySize(136,202);
+    this.character.rest(this.room.objects.some(o=>o.state.held));
+    this.updateHand();
   }
   createObject(obj){
     let sprite;
@@ -147,6 +171,7 @@ export class RoomScene extends Phaser.Scene {
     }
     for(const ring of this.glows.values())ring.destroy();
     for(const display of this.doorGraphics||[])display.destroy();
+    for(const display of this.stationArt||[])display.destroy();
     this.objects.clear();
     this.glows.clear();
     this.doorGraphics=[];
@@ -157,6 +182,7 @@ export class RoomScene extends Phaser.Scene {
     this.character.stop(false);
     this.handSprite.setTexture('obj-book').setVisible(false);
     next.objects.forEach(obj=>this.createObject(obj));
+    this.stationArt=[];this.drawStations();
     this.drawDoors();
     this.isLeaving=false;
     this.updateHand();
@@ -201,11 +227,29 @@ export class RoomScene extends Phaser.Scene {
     const finished=await this.character.playRecipe(action.recipe,Math.max(380,action.duration*.62));
     if(!finished||!this.scene.isActive('RoomScene'))return false;
     if(!preview){
+      const changes={
+        shave_face:{beard:'none'},put_on_shirt:{outfit:'casual'},
+        put_on_suit:{outfit:'formal'},take_off_shirt:{outfit:'home'},
+        put_on_pajamas:{outfit:'pajamas'}
+      }[phrase.action];
+      if(changes)this.controller.updateAvatarAppearance(changes);
       if(action.effects.held===true)for(const other of this.room.objects)if(other.id!==obj.id && other.state.held){other.state.held=false;this.updateObject(other)}
       Object.assign(obj.state,action.effects);this.updateObject(obj);
     }
     if(action.recipe==='switch'){this.cameras.main.flash(120,255,210,162,false)}
     this.character.rest(this.room.objects.some(o=>o.state.held));this.updateHand();
+    const facial={shave_face:'shave',brush_teeth:'brush',smile_face:'smile',
+      cry_face:'cry',blink_eyes:'blink',shout_face:'shout'}[phrase.action];
+    if(facial&&this.controller.avatarFactory){
+      const key=this.controller.avatarFactory.expressionKey(this.controller.avatar,facial);
+      if(this.textures.exists(key)){
+        this.hero.setTexture(key);
+        this.time.delayedCall(1100,()=>{
+          if(this.sys.isActive()&&this.hero?.active)
+            this.character.rest(this.room.objects.some(o=>o.state.held));
+        });
+      }
+    }
     this.busy=false;
     return true;
   }

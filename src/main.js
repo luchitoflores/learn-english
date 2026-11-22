@@ -46,17 +46,34 @@ class GameApp {
     this.toast(`Llegaste a ${this.room.name}. Toca un objeto para escuchar su nombre.`);
   }
   switchRoom(id,{fromRoom=this.roomId,throughDoor=false,force=false}={}){
-    if(!ROOMS[id])return;
-    if(id===this.roomId && !force){this.closeModal();return;}
+    if(!ROOMS[id])return false;
+    if(id===this.roomId && !force){this.closeModal();return true;}
     const returnDoor=ROOMS[id].exits.find(exit=>exit.to===fromRoom);
-    this.entryX=throughDoor && returnDoor ? (returnDoor.x<640?145:1135) : 640;
+    const entryX=throughDoor&&returnDoor?(returnDoor.x<640?145:1135):640;
+    if(!this.scene?.sys.isActive()){
+      this.toast('La habitación todavía está cargando.');
+      return false;
+    }
+    if(this.scene.busy){
+      this.toast('Termina la acción antes de cambiar de habitación.');
+      return false;
+    }
     this.modeEngine.cancelPending();
-    this.movement=0;this.selected=null;
+    this.movement=0;
     this.closeActionPanel();this.closeModal();
-    this.roomId=id;this.progress.room=id;saveProgress(this.progress);
-    // ScenePlugin.restart queues shutdown and startup safely and ensures
-    // the character, objects and input handlers belong to the new room.
-    this.scene?.scene.restart({controller:this,roomId:id});
+    // Update the artwork and hitboxes first; only announce a room change
+    // once the scene has actually swapped all visible objects.
+    const swapped=this.scene.changeRoom(id,entryX);
+    if(!swapped){
+      this.toast('No fue posible cambiar de habitación.');
+      return false;
+    }
+    this.selected=null;
+    this.roomId=id;
+    this.progress.room=id;
+    saveProgress(this.progress);
+    this.onRoomReady(this.scene);
+    return true;
   }
   drawRoomExits(){
     const exits=$('room-exits');
@@ -69,7 +86,8 @@ class GameApp {
         textContent:(left?'◀ ':'')+exit.label+(left?'':' ▶')
       });
       button.setAttribute('aria-label','Ir a '+exit.label);
-      button.onclick=()=>this.scene?.goThroughDoor(exit);
+      // DOM navigation bypasses canvas object hitboxes and door walk delays.
+      button.onclick=e=>{e.preventDefault();e.stopPropagation();this.switchRoom(exit.to,{fromRoom:this.roomId,throughDoor:true})};
       return button;
     }));
   }

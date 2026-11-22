@@ -37,3 +37,13 @@
 
 .avatar-lab-link{display:block;margin-top:14px;padding:14px 16px;border:1px solid #eac99985;border-radius:12px;color:#ffdfad;background:#2d3650;text-decoration:none;font-size:14px;font-weight:800;text-align:center;line-height:1.4}
 .avatar-lab-link:hover,.avatar-lab-link:focus-visible{background:#594863;border-color:#f8d5a9}
+
+
+/* Room exits must receive touch input above Phaser's canvas and object hitboxes. */
+#game{position:relative;z-index:0}
+#room-exits{z-index:40;isolation:isolate;pointer-events:auto}
+#room-exits .room-exit{position:relative;z-index:41;pointer-events:auto;touch-action:manipulation;min-height:50px;min-width:112px}
+@media(max-width:760px){
+  #room-exits{top:52px;right:8px}
+  #room-exits .room-exit{min-height:52px;min-width:116px;font-size:14px}
+}

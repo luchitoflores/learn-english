@@ -48,9 +48,9 @@ class GameApp {
     this.movement=0;this.selected=null;
     this.closeActionPanel();this.closeModal();
     this.roomId=id;this.progress.room=id;saveProgress(this.progress);
-    this.game.scene.stop('RoomScene');
-    // Phaser scene transitions must be deferred until scene shutdown completes.
-    this.game.scene.start('RoomScene',{controller:this,roomId:id});
+    // ScenePlugin.restart queues shutdown and startup safely and ensures
+    // the character, objects and input handlers belong to the new room.
+    this.scene?.scene.restart({controller:this,roomId:id});
   }
   drawModes(){
     $('mode-dock').replaceChildren(...MODES.map(mode=>{

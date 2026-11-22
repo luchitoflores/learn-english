@@ -33,8 +33,8 @@ export class RoomScene extends Phaser.Scene {
     const desiredKey=this.controller.avatarFactory?.profileKey(this.controller.avatar)||'hero-idle';
     const avatarKey=this.textures.exists(desiredKey)?desiredKey:'hero-idle';
     this.hero=this.add.sprite(startX,631,avatarKey).setOrigin(.5,1)
-      .setDisplaySize(avatarKey==='hero-side-walk'?160:avatarKey==='hero-idle'?126:95,
-        avatarKey==='hero-idle'?160:205).setDepth(14);
+      .setDisplaySize(165,225).setDepth(14);
+    this.idleScaleY=this.hero.scaleY;
     this.hero.setInteractive({useHandCursor:true});
     this.hero.on('pointerdown',()=>this.controller.toast('Toca un objeto para descubrir acciones.'));
     this.character=new CharacterAnimator(this,this.hero,this.controller.makeAvatarProfile()||undefined);
@@ -102,7 +102,8 @@ export class RoomScene extends Phaser.Scene {
     const key=this.controller.avatarFactory.profileKey(this.controller.avatar);
     if(!this.textures.exists(key))return;
     this.character.setSkin(this.controller.makeAvatarProfile());
-    this.hero.setDisplaySize(key==='hero-side-walk'?160:95,205);
+    this.hero.setDisplaySize(165,225);
+    this.idleScaleY=this.hero.scaleY;
     this.character.rest(this.room.objects.some(o=>o.state.held));
     this.updateHand();
   }
@@ -202,7 +203,12 @@ export class RoomScene extends Phaser.Scene {
     this.isLeaving=true;
     const arrived=await this.walkTo(exit.x<640?105:1175);
     if(arrived&&this.scene.isActive('RoomScene')){
-      this.controller.switchRoom(exit.to,{fromRoom:this.roomId,throughDoor:true});
+      // The character faces the door and reaches for it before the transition.
+      this.character.turn(exit.x<this.hero.x);
+      this.character.setPose('use');
+      await new Promise(resolve=>this.time.delayedCall(280,resolve));
+      if(this.scene.isActive('RoomScene'))
+        this.controller.switchRoom(exit.to,{fromRoom:this.roomId,throughDoor:true});
     }else{
       this.isLeaving=false;
     }
@@ -263,10 +269,11 @@ export class RoomScene extends Phaser.Scene {
   async executeAction(obj,phrase){return this.animateAction(obj,phrase,{preview:false})}
   update(_time,delta){
     if(!this.hero)return;
-    // Gentle body tilt makes the raster character respond to movement
-    // until we have individually animated limb assets.
-    if(this.hero.anims.isPlaying)this.hero.setAngle(Math.sin(_time*.013)*2);
-    else if(!this.busy)this.hero.setAngle(0);
+    // Subtle front-facing idle breathing, never stretching the side walk.
+    const isWalking=this.hero.anims.isPlaying;
+    if(!isWalking&&!this.busy&&!this.isLeaving&&!this.controller.editorActive)
+      this.hero.scaleY=this.idleScaleY*(1+Math.sin(_time*.0032)*.006);
+    else this.hero.scaleY=this.idleScaleY;
     this.followCharacter();
     if(this.busy||this.isLeaving||this.controller.editorActive)return;
     const left=this.keys.A.isDown||this.keys.LEFT.isDown||this.controller.movement<0;

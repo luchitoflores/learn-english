@@ -21,7 +21,7 @@ export class CharacterAnimator {
     const sheet=this.profile.sideSheet;
     if(sheet&&this.scene.textures.exists(sheet)){
       this.scene.anims.create({key:this.walkKey,
-        frames:this.scene.anims.generateFrameNumbers(sheet,{frames:[1,2,3,2]}),
+        frames:this.scene.anims.generateFrameNumbers(sheet,{frames:[1,2,3,4,5,6,2]}),
         frameRate:8,repeat:-1});
     }else{
       this.scene.anims.create({key:this.walkKey,frames:[
@@ -43,15 +43,26 @@ export class CharacterAnimator {
   setPose(pose) {
     if (this.disposed || !this.sprite?.active) return;
     this.sprite.stop();
-    const key=this.keyFor(pose);
-    if(this.scene.textures.exists(key)){
-      if(this.profile.sideSheet){
-        const frames={idle:0,walkA:1,walkB:2,crouch:0,reach:3,grab:3,
-          hold:0,use:3,sit:0};
-        this.sprite.setTexture(key,frames[pose]??0);
-      }else this.sprite.setTexture(key);
+    if(pose==='idle'){
+      // Idle ALWAYS looks towards the player, regardless of last direction.
+      const key=this.profile.frontKey||this.keyFor('idle');
+      if(this.scene.textures.exists(key))this.sprite.setTexture(key);
+      this.sprite.setFlipX(false);
+      this.sprite.setAngle(0);
+      this.syncLayers();
+      return;
     }
-    this.sprite.setAngle(pose==='reach'?-7:pose==='use'?6:pose==='crouch'?2:0);
+    const sheet=this.profile.sideSheet;
+    if(sheet&&this.scene.textures.exists(sheet)){
+      const frames={walkA:1,walkB:2,crouch:4,reach:7,grab:7,
+        hold:0,use:7,sit:0};
+      this.sprite.setTexture(sheet,frames[pose]??0);
+    }else{
+      const key=this.keyFor(pose);
+      if(this.scene.textures.exists(key))this.sprite.setTexture(key);
+    }
+    this.sprite.setAngle(pose==='reach'?-3:pose==='use'?2:0);
+    this.syncLayers();
   }
   walk() {
     if (this.disposed || !this.sprite?.active) return;
@@ -59,7 +70,7 @@ export class CharacterAnimator {
       this.sprite.play(this.walkKey);
     }
   }
-  rest(held = false) { this.setPose(held ? 'hold' : 'idle'); }
+  rest(_held = false) { this.setPose('idle'); }
   turn(left) {
     if (this.disposed) return;
     this.sprite.setFlipX(Boolean(left));

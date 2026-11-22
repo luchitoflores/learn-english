@@ -30,16 +30,31 @@ try {
   }));
   assert(state.width>200&&state.height>150,'Canvas missing or too small: '+JSON.stringify(state));
   assert.equal(state.background,'room-'+state.room);
-  assert(state.hero==='hero-side-walk'||state.hero.startsWith('hero-raster-'),'Character texture missing: '+state.hero);
+  assert.equal(state.hero,'hero-front-beard','Idle character must face forward');
   // Exercise the actual frame-based sideways walk, not a sliding still image.
   await page.evaluate(()=>{window.wordQuest.movement=1});
   await page.waitForTimeout(250);
   const walking=await page.evaluate(()=>({
     key:window.wordQuest.scene.hero.anims.currentAnim?.key,
-    playing:window.wordQuest.scene.hero.anims.isPlaying
+    playing:window.wordQuest.scene.hero.anims.isPlaying,
+    texture:window.wordQuest.scene.hero.texture.key
   }));
   await page.evaluate(()=>{window.wordQuest.movement=0});
   assert(walking.playing&&walking.key?.includes('walk'),'Side walk animation failed: '+JSON.stringify(walking));
+  assert.equal(walking.texture,'hero-side-walk-clean','Walking must show the lateral frames');
+  await page.waitForFunction(()=>window.wordQuest?.scene?.hero?.texture?.key==='hero-front-beard',null,{timeout:5000});
+  const pose=await page.evaluate(()=>{
+    const scene=window.wordQuest.scene;
+    scene.character.turn(true);
+    scene.character.setPose('use');
+    const action={key:scene.hero.texture.key,frame:scene.hero.frame.name,flip:scene.hero.flipX};
+    scene.character.rest();
+    return {action,returned:scene.hero.texture.key,frontFlip:scene.hero.flipX};
+  });
+  assert.equal(pose.action.key,'hero-side-walk-clean','Interaction must show the lateral pose');
+  assert.equal(pose.action.frame,7,'Reach frame is missing');
+  assert.equal(pose.returned,'hero-front-beard','Character did not return to front after interaction');
+  assert.equal(pose.frontFlip,false,'Front view must not be flipped');
   const shot=await page.locator('#game canvas').screenshot({path:artifacts+'/bedroom-mobile.png'});
   const png=PNG.sync.read(shot);
   const distinct=new Set();

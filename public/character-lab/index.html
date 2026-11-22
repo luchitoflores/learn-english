@@ -14,7 +14,7 @@ header{padding:18px 16px 10px;max-width:990px;margin:auto;display:flex;align-ite
 <header><div><small>WORD QUEST · CHARACTER STUDIO</small><h1>Personaje de Word Quest</h1></div><a href="../">Volver al juego</a></header>
 <main>
 <section class="panel">
- <div class="portrait" id="portrait"><img id="hero" alt="Protagonista maduro de cabello plateado" src="../assets/hero/beard.webp"></div>
+ <div class="portrait" id="portrait"><img id="hero" alt="Protagonista maduro de cabello plateado" src="../assets/hero/front-beard.png"></div>
  <div class="caption"><strong>El explorador</strong><p>Adulto, cabello plateado, complexión robusta</p></div>
  <div class="toolbar"><button id="repeat">Escuchar acción</button><button id="save">Guardar apariencia</button></div>
  <div id="feedback"><strong>He is standing.</strong><span>Él está de pie.</span></div>
@@ -40,7 +40,7 @@ const KEY='wq-avatar-profile-v1';
 const DEFAULT={actor:'he',beard:'full',outfit:'casual',hair:'short',hairColor:'silver',skin:'medium',shirtColor:'brick'};
 let state;try{state={...DEFAULT,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{state={...DEFAULT}};
 const $=id=>document.getElementById(id);
-const assets={beard:'../assets/hero/beard.webp',shaved:'../assets/hero/shaved.webp',suit:'../assets/hero/suit.webp'};
+const assets={beard:'../assets/hero/front-beard.png',shaved:'../assets/hero/front-shaved.png',suit:'../assets/hero/front-suit.png'};
 const phrases={shave:['Shave your beard.','Rasúrate la barba.'],suit:['Put on your suit.','Ponte el traje.'],shirt:['Put on your jacket.','Ponte la chaqueta.'],smile:['Smile.','Sonríe.'],brush:['Brush your teeth.','Cepíllate los dientes.'],walk:['Walk around.','Camina por la habitación.']};
 let current='He is standing.';
 function refresh(){

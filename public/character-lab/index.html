@@ -51,7 +51,7 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
 @keyframes care-motion{from{transform:translateY(-4px)}to{transform:translateY(5px)}}
 @media(max-width:700px){main{grid-template-columns:1fr;gap:11px}.stage{min-height:355px}.stage svg{height:355px;max-width:100%}.card{padding:12px}.actions button{min-height:54px}}
 
-.actions button[hidden]{display:none}
+.lab-tools{display:flex;justify-content:flex-end;margin-top:12px}.lab-tools button{padding:10px 14px;border:1px solid #e7c28c;border-radius:10px;background:#76577a;color:#ffebd4;font-weight:800}.actions button[hidden]{display:none}
 #bareTorso{filter:drop-shadow(1px 2px 2px #3b243655)}
 #beard{transition:opacity .25s}
 .stage.shirt #shirtLayer,.stage.suit #suitLayer{animation:wear .5s ease-out}
@@ -177,6 +177,9 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
           </g>
         </g>
       </g>
+      <!-- In plural pronoun practice, two distinct actor instances share the
+           animation rig; the second can later receive an independent profile. -->
+      <use id="supportActor" href="#char" transform="translate(195 116) scale(.68)" style="--hair:#556a74;--shirt:#587aa1;--shirt-shadow:#3b5678;--beard:#687783" display="none" opacity=".98"/>
     </svg>
   </div>
   <div class="info"><strong id="phrase">Hello!</strong><span id="meaning">Hola. Prueba una acción para ver cómo cambian las piezas.</span></div>
@@ -214,6 +217,7 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
       <label>Barba<select id="beardStyle"><option value="full">Barba completa</option><option value="none">Sin barba</option></select></label>
     </div>
   </fieldset>
+  <div class="lab-tools"><button type="button" id="saveAvatar">↓ Exportar personaje JSON</button></div>
   <p class="note">Prototipo gratuito con diseño original, sin Spine ni assets de terceros. El personaje maduro tiene piezas vectoriales independientes para ojos, cejas, boca, barba, cabello, torso, brazos y piernas. Los cambios de vestuario y el uso de <b>he, she, they, his, her y their</b> son demostraciones educativas. Para un personaje final de calidad 3D caricaturesca necesitaremos arte más detallado. Esta prueba todavía no sustituye al protagonista del juego principal.</p>
 </section>
 </main>
@@ -306,6 +310,7 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
   $('hair').onchange=e=>{hide(['hairShort','hairLong']);show(e.target.value==='short'?'hairShort':'hairLong')};
   $('beardStyle').onchange=()=>{ $('beard').setAttribute('display',$('beardStyle').value==='full'?'inline':'none') };
   $('actor').onchange=()=>{
+    $('supportActor').setAttribute('display',$('actor').value==='they'?'inline':'none');
     if($('actor').value==='she'){
       $('hair').value='long';$('hair').onchange({target:$('hair')});
       $('beardStyle').value='none';$('beardStyle').onchange();
@@ -329,6 +334,19 @@ footer{max-width:1020px;margin:auto;padding:0 20px 22px;color:#c6cce0;font-size:
     $(id).dispatchEvent(new Event('change'));
     $(id).addEventListener('change',()=>localStorage.setItem('wq-avatar-demo-v2',JSON.stringify({outfit:$('outfit').value,hairColor:$('hairColor').value,skin:$('skin').value})));
   }
+  $('saveAvatar').onclick=()=>{
+    const config={
+      version:1,
+      actor:$('actor').value,
+      mode:$('context').value,
+      character:{body:'tall_broad',age:'mature',hair:$('hair').value,hairColor:$('hairColor').value,beard:$('beardStyle').value,skin:$('skin').value,shirtColor:$('outfit').value,outfit:outfitState},
+      lastAction:currentAction
+    };
+    const data=new Blob([JSON.stringify(config,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(data);a.download='wordquest-avatar.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),500);
+  };
   action('idle');
 })();
 </script>

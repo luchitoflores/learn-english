@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18243b">
+  <meta name="description" content="Word Quest: explora objetos de la casa y aprende inglés con imágenes, escucha, reconocimiento y dictado.">
+  <title>House Lab · Word Quest</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <div class="brand"><div class="mark">✦</div><div><small>WORD QUEST / LIVING ENGLISH</small><h1>House Lab</h1></div></div>
+      <a class="back-game" href="../">↩ Juego clásico</a>
+    </header>
+    <section class="hero">
+      <div class="hero-intro">
+        <span class="eyebrow">EXPLORA · ESCUCHA · RECUERDA</span>
+        <h2>Abre un objeto. Descubre una palabra.</h2>
+        <p>Explora lo que hay en casa y practica únicamente el vocabulario que necesitas aprender. Sin caminar ni mover objetos de un lado a otro.</p>
+      </div>
+      <div class="hero-stats">
+        <div><strong id="stat-groups">16</strong><span>contenedores</span></div>
+        <div><strong id="stat-words">298</strong><span>objetos</span></div>
+        <div><strong id="stat-known">0</strong><span>conocidos</span></div>
+        <div><strong id="stat-learning">0</strong><span>por aprender</span></div>
+      </div>
+    </section>
+
+    <main>
+      <section id="board-screen" class="screen">
+        <div class="section-head"><div><span class="eyebrow">01 / ELIGE UN LUGAR</span><h2>Tu mesa de exploración</h2></div><span id="group-total" class="count-pill"></span></div>
+        <div class="search-panel">
+          <label class="search-field"><span aria-hidden="true">⌕</span><input id="group-search" type="search" placeholder="Buscar: botiquín, herramientas, cocina…" autocomplete="off"><span class="shortcut">⌕</span></label>
+          <nav id="area-filters" class="filter-strip" aria-label="Filtrar lugares de la casa"></nav>
+        </div>
+        <div id="container-board" class="container-board" aria-label="Contenedores de la casa"></div>
+        <p class="board-note">Los objetos ilustrados provienen de nuestros sprites actuales; los demás usan iconos temporales que podremos reemplazar por Kenney.</p>
+      </section>
+
+      <section id="lab-screen" class="screen hidden">
+        <div class="lab-heading">
+          <button id="go-board" class="back-button" type="button">← Elegir otro lugar</button>
+          <div class="location-name"><span class="eyebrow" id="lab-area"></span><h2><span id="lab-emoji"></span> <span id="lab-name"></span></h2><p id="lab-description"></p></div>
+          <span id="lab-total" class="count-pill"></span>
+        </div>
+        <div class="workspace">
+          <div class="study-desk">
+            <div class="wood-strip"><span>◈ MESA DE OBJETOS</span><span id="page-indicator">1 / 1</span></div>
+            <nav id="mode-tabs" class="mode-tabs" aria-label="Modo de aprendizaje">
+              <button type="button" data-mode="explore" class="active">✦ Descubrir</button>
+              <button type="button" data-mode="listen">♫ Escuchar</button>
+              <button type="button" data-mode="find">⌕ Reconocer</button>
+              <button type="button" data-mode="sentences">▤ Órdenes</button>
+              <button type="button" data-mode="dictation">✎ Dictado</button>
+              <button type="button" data-mode="review">↻ Repasar</button>
+            </nav>
+            <div class="desk-caption"><strong id="desk-title">Toca un objeto para descubrirlo</strong><span id="desk-subtitle">Tú decides qué palabras necesitas practicar.</span></div>
+            <div id="vocab-grid" class="vocab-grid" role="group" aria-label="Objetos seleccionables"></div>
+            <div id="dictation-area" class="dictation-area hidden">
+              <div id="dictation-picture" class="dictation-picture" aria-label="Imagen de la palabra del dictado"></div>
+              <label for="dictation-input">Escribe en inglés lo que escuchas</label>
+              <form id="dictation-form" autocomplete="off">
+                <input id="dictation-input" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Write the word...">
+                <button type="submit">Comprobar ✓</button>
+              </form>
+            </div>
+            <div class="desk-bottom">
+              <button id="page-prev" class="secondary" type="button">← Anterior</button>
+              <span id="selection-count">0 objetos encontrados</span>
+              <button id="page-next" class="secondary" type="button">Siguiente →</button>
+            </div>
+          </div>
+
+          <aside class="learning-panel">
+            <div class="panel-head"><span class="eyebrow">02 / APRENDE EN INGLÉS</span><span class="progress-pill" id="session-score">0 aciertos</span></div>
+            <div class="mission-box">
+              <div class="micro-label">INSTRUCCIÓN</div>
+              <p id="mission-prompt">Explora libremente.</p>
+              <p id="mission-helper">Toca cualquier objeto para descubrir su nombre en inglés.</p>
+              <div class="mission-actions">
+                <button id="listen-button" type="button">♫ Escuchar</button>
+                <button id="hint-button" class="ghost" type="button">Aa Mostrar texto</button>
+              </div>
+            </div>
+            <div id="feedback-panel" class="feedback-panel" role="status" aria-live="polite">
+              <span class="micro-label">TU DESCUBRIMIENTO</span>
+              <strong id="feedback-en">Ready to explore?</strong>
+              <span id="feedback-es">Elige un lugar y comienza a descubrir.</span>
+              <p id="feedback-detail">Puedes escuchar cada palabra y marcar lo que ya conoces.</p>
+            </div>
+            <div class="mark-tools">
+              <button id="mark-learning" type="button" disabled>☆ Necesito practicar</button>
+              <button id="mark-known" type="button" disabled>✓ Ya la conozco</button>
+            </div>
+            <button id="next-exercise" type="button" class="next-exercise hidden">Otra palabra →</button>
+            <div class="study-hint"><strong>Aprendizaje adaptativo</strong><p>Las palabras que marcas para practicar y las que respondes mal aparecerán más veces. Las conocidas se priorizan menos.</p></div>
+            <div class="mini-stats"><span id="group-progress">0 de 0 descubiertas</span><span id="status-message">Sin iniciar</span></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

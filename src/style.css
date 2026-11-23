@@ -232,3 +232,7 @@
  .inventory-fridge-mode .inventory-item{min-height:93px}
  .inventory-fridge-mode .inventory-item .inventory-pixel-sprite{transform:scale(.86);margin:-4px}
 }
+/* Direct entry to the illustrated house vocabulary workshop. */
+.top-house-link{display:flex;align-items:center;justify-content:center;border:1px solid #e8c184;background:#e4bd81;color:#26374c;border-radius:12px;min-height:39px;padding:9px 12px;font-size:12px;font-weight:850;white-space:nowrap}
+.top-house-link:hover,.top-house-link:focus-visible{background:#ffe1a8}
+@media(max-width:760px){.top-house-link{padding:7px 8px;font-size:10px;white-space:normal;max-width:105px;text-align:center}}

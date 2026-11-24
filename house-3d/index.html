@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/assets/hero/idle.png">
+  <title>La casa en 3D · Word Quest</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../">Word Quest</a>
+    <a class="back" href="../">← Volver al juego</a>
+  </header>
+  <main class="layout">
+    <section class="scene-column">
+      <header class="intro">
+        <h1 id="view-title">La casa en 3D</h1>
+        <p id="view-description">Abre un mueble, observa lo que hay dentro y practica verbos frasales.</p>
+      </header>
+      <nav class="rooms experience-controls" aria-label="Secciones de práctica">
+        <button id="house-view" type="button" aria-pressed="true">Explorar la casa</button>
+        <button id="animation-view" type="button" aria-pressed="false">Animaciones del Ranger</button>
+      </nav>
+      <nav id="rooms" class="rooms" aria-label="Habitaciones"></nav>
+      <div class="viewport" id="viewport" aria-label="Escena tridimensional de la habitación">
+        <p id="scene-message" class="scene-message" role="status">Cargando personaje y modelos 3D…</p>
+      </div>
+      <nav id="stations" class="stations" aria-label="Muebles de la habitación"></nav>
+    </section>
+    <section class="study animation-catalog" id="animation-catalog" aria-labelledby="animation-title" hidden>
+      <header class="study-head">
+        <div>
+          <p class="eyebrow" id="animation-count"></p>
+          <h2 id="animation-title">Elige una acción</h2>
+        </div>
+        <button id="animation-replay" type="button" disabled>Repetir</button>
+      </header>
+      <div class="animation-filters">
+        <label>Buscar un verbo o una acción
+          <input type="search" id="animation-search" placeholder="Ej. pick up">
+        </label>
+        <label>Categoría
+          <select id="animation-category"></select>
+        </label>
+      </div>
+      <p id="animation-result" class="animation-result" role="status"></p>
+      <div id="animation-actions" class="animation-actions"></div>
+    </section>
+    <section class="study" aria-labelledby="inventory-title">
+      <header class="study-head">
+        <div>
+          <p class="eyebrow" id="room-label"></p>
+          <h2 id="inventory-title">Elige un mueble</h2>
+          <p id="inventory-subtitle">Selecciona un mueble para ver su contenido.</p>
+        </div>
+        <button id="close" type="button" hidden>Cerrar</button>
+      </header>
+      <div id="activities" hidden>
+        <div class="modes" aria-label="Modo de práctica">
+          <button id="explore" type="button" aria-pressed="true">Explorar</button>
+          <button id="listen" type="button" aria-pressed="false">Reto de audio</button>
+        </div>
+        <div class="phrase">
+          <div aria-live="polite">
+            <strong id="english" lang="en"></strong>
+            <span id="spanish"></span>
+          </div>
+          <button id="replay" type="button">♪ Escuchar</button>
+        </div>
+        <div id="items" class="items"></div>
+        <div class="study-footer">
+          <span id="feedback" role="status"></span>
+          <button id="next" type="button" hidden>Otra orden</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

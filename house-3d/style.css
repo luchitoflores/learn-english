@@ -1,0 +1,178 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  color: #202c27;
+  background: #f3f1e7;
+  --ink: #202c27;
+  --muted: #52635b;
+  --line: #d9ded0;
+  --paper: #fffef9;
+  --green: #245645;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+a { color: inherit; }
+button { font: inherit; cursor: pointer; color: inherit; }
+button:disabled { cursor: wait; }
+:focus-visible { outline: 3px solid #b65736; outline-offset: 3px; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem max(1rem, calc((100vw - 1440px) / 2));
+  background: #203f35;
+  color: #fefbec;
+}
+.brand { font-family: Georgia, serif; font-size: 1.35rem; font-weight: bold; text-decoration: none; }
+.back { color: #f3e9ce; font-size: 0.9rem; text-underline-offset: 0.25rem; }
+.layout {
+  max-width: 1472px;
+  margin: auto;
+  padding: 1.5rem 1rem 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(20rem, 1fr);
+  align-items: start;
+  gap: 1.25rem;
+}
+.scene-column { min-width: 0; }
+.intro h1 {
+  margin: 0;
+  font: bold clamp(2.3rem, 6vw, 4.7rem)/0.98 Georgia, serif;
+  letter-spacing: -0.065em;
+}
+.intro p { color: var(--muted); margin: 0.65rem 0 1rem; }
+.rooms, .stations, .modes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.rooms { margin-bottom: 0.65rem; }
+.stations { margin-top: 0.65rem; }
+.rooms button, .stations button, .modes button, .study button {
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--paper);
+  font-weight: 650;
+}
+button[aria-pressed="true"], .study .modes button[aria-pressed="true"], #next {
+  background: var(--green);
+  color: #fffdfa;
+  border-color: var(--green);
+}
+.viewport {
+  position: relative;
+  width: 100%;
+  height: clamp(21rem, 43vw, 37rem);
+  overflow: hidden;
+  background: #e7ebe1;
+  border: 1px solid #d5dfd2;
+  border-radius: 1rem;
+}
+.viewport canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
+.viewport.busy canvas { cursor: wait; }
+.scene-message {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--paper);
+  color: var(--muted);
+}
+.study {
+  margin-top: 0.2rem;
+  min-width: 0;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--paper);
+}
+.study-head, .phrase, .study-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; }
+.study-head { margin-bottom: 1rem; }
+.study-head > div { min-width: 0; }
+.eyebrow { margin: 0; color: var(--green); font-size: 0.74rem; font-weight: 750; text-transform: uppercase; letter-spacing: 0.13em; }
+.study h2 { margin: 0.24rem 0; font: bold clamp(1.5rem, 3.1vw, 2.45rem)/1 Georgia, serif; }
+.in-station .study h2 { font-size: clamp(1.35rem, 2.4vw, 2.1rem); overflow-wrap: anywhere; }
+#inventory-subtitle { margin: 0.4rem 0 0; color: var(--muted); }
+.phrase { background: #e8eee4; border-radius: 0.65rem; padding: 0.7rem; margin: 0.8rem 0; }
+.phrase strong { display: block; color: var(--green); }
+.phrase span { display: block; margin-top: 0.25rem; color: var(--muted); font-size: 0.9rem; }
+#replay, #next { flex-shrink: 0; }
+.items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; }
+.study .items button {
+  background: #faf8ee;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  flex-direction: column;
+  padding: 0.45rem 0.2rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.items button:hover { border-color: var(--green); }
+.item-art { display: block; width: 2.65rem; height: 2.65rem; object-fit: contain; margin-bottom: 0.2rem; }
+.model-item { display: grid; place-items: center; color: var(--green); background: #e6ebdd; border-radius: 0.65rem; font-size: 0.75rem; }
+.items strong { font-size: 0.89rem; }
+.item-translation { font-weight: normal; color: var(--muted); font-size: 0.76rem; }
+.items small { padding-top: 0.3rem; color: var(--green); font-size: 0.72rem; }
+.study-footer { padding-top: 0.75rem; font-size: 0.9rem; color: var(--green); }
+.experience-controls { padding-bottom: 0.65rem; border-bottom: 1px solid var(--line); }
+.animation-mode #rooms, .animation-mode #stations,
+.animation-mode .study:not(.animation-catalog) { display: none; }
+.animation-filters {
+  display: grid;
+  gap: 0.6rem;
+}
+.animation-filters label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+.animation-filters input, .animation-filters select {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: var(--paper);
+  font: inherit;
+  color: var(--ink);
+}
+.animation-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  max-height: min(52vh, 32rem);
+  overflow: auto;
+  padding: 0.3rem;
+  margin: 0.65rem -0.3rem -0.3rem;
+}
+.animation-actions button { min-width: 0; text-align: left; overflow-wrap: anywhere; }
+.animation-actions small { display: block; margin-top: 0.25rem; font-weight: normal; opacity: 0.86; }
+.animation-actions button[aria-pressed="true"] { color: var(--paper); background: var(--green); }
+.animation-result { margin: 0.65rem 0 0; color: var(--green); }
+.animation-result:empty { display: none; }
+
+@media (min-width: 861px) {
+  .layout.in-station { grid-template-columns: minmax(0, 1fr); }
+  .in-station .scene-column, .in-station .study { grid-area: 1 / 1; }
+  .in-station .study {
+    z-index: 1;
+    align-self: end;
+    justify-self: end;
+    width: clamp(18rem, 32%, 28rem);
+    max-height: calc(clamp(21rem, 43vw, 37rem) - 1.5rem);
+    overflow: hidden auto;
+    margin: 0 0.85rem 3.85rem 0;
+    box-shadow: 0 0.7rem 2.2rem #1c302b33;
+  }
+}
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .viewport { height: clamp(18rem, 65vw, 31rem); }
+  .in-station .study { margin: -0.75rem 0.4rem 0; z-index: 1; }
+}

@@ -184,6 +184,7 @@ export class HouseScene {
       const dt = Math.min((now - previous) / 1000, 0.05);
       previous = now;
       this.mixer?.update(dt);
+      this.partnerMixer?.update(dt);
       this.pendingTweens = this.pendingTweens.filter(tween => {
         const progress = Math.min(1, (tween.elapsed += dt) / tween.seconds);
         tween.update(progress * progress * (3 - 2 * progress));
@@ -238,6 +239,7 @@ export class HouseScene {
   }
 
   async previewMotion({ pack, clip, start, hold, distance }) {
+    this.hidePartner();
     if (!this.mixer) return;
     const path = `KayKit_Character_Animations_1.1/Animations/gltf/Rig_Medium/Rig_Medium_${pack}.glb`;
     const { animations } = await loadModel(path);
@@ -263,7 +265,38 @@ export class HouseScene {
     this.play(hold || 'Idle_A');
   }
 
+  hidePartner() {
+    if(this.partner) this.partner.visible=false;
+    this.partnerMixer?.stopAllAction();
+  }
+
+  async previewGreeting(far=false) {
+    if(!this.studio || !this.mixer) throw new Error('Studio not ready');
+    if(!this.partner){
+      const [character,general,simulation]=await Promise.all([
+        loadModel(`${adventurers}/Characters/gltf/Mage.glb`),loadModel(rig+'General.glb'),loadModel(rig+'Simulation.glb')]);
+      const figure=character.scene;
+      normalize(figure,1.68);
+      this.partner=group(this.world);this.partner.add(figure);
+      this.partnerMixer=new THREE.AnimationMixer(figure);
+      this.partnerIdle=this.partnerMixer.clipAction(general.animations.find(c=>c.name==='Idle_A'));
+      this.partnerWave=this.partnerMixer.clipAction(simulation.animations.find(c=>c.name==='Waving'));
+    }
+    const {animations}=await loadModel(rig+'Simulation.glb');
+    if(!this.actions.has('Waving'))this.actions.set('Waving',this.mixer.clipAction(animations.find(c=>c.name==='Waving')));
+    const gap=far?2.8:1.25;
+    this.hero.position.set(-gap/2,0,0);this.hero.rotation.y=Math.PI/2;
+    this.partner.position.set(gap/2,0,0);this.partner.rotation.y=-Math.PI/2;this.partner.visible=true;
+    this.partnerMixer.stopAllAction();this.partnerIdle.reset().play();
+    const duration=this.play('Waving',false);
+    await this.tween(duration,()=>{});this.play('Idle_A');
+    this.partnerIdle.stop();this.partnerWave.reset().setLoop(THREE.LoopOnce,1).play();
+    await this.tween(this.partnerWave.getClip().duration,()=>{});
+    this.partnerWave.stop();this.partnerIdle.reset().play();
+  }
+
   setRoom(id) {
+    this.hidePartner();
     this.studio = false;
     this.exitDetail();
     this.camera.position.set(7, 6.4, 10);
@@ -300,6 +333,7 @@ export class HouseScene {
   }
 
   setStudio() {
+    this.hidePartner();
     this.studio = true;
     this.exitDetail();
     this.clearItems();

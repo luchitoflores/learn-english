@@ -4,6 +4,7 @@ import { animationClips } from './animation-clips.js';
 import { ACTION_SENTENCES, PHRASAL_FAMILIES, actionExercise } from './action-phrases.js';
 import { HouseScene } from './scene.js';
 import './style.css';
+import { initListening } from './listening.js';
 
 const $ = id => document.getElementById(id);
 
@@ -29,6 +30,7 @@ let experience = 'house';
 let phraseQuestion = null, phraseResolved = false, phraseScore = 0, phraseCount = 0;
 let selectedAnimation;
 let characterReady;
+const listening = initListening({getScene:()=>scene, ready:()=>characterReady, setBusy, speak});
 
 function setPhrase(next, hidden = false) {
   phrase = next;
@@ -340,26 +342,31 @@ function setExperience(next) {
   if(busy || experience===next)return;
   experience=next;
   stationId=undefined;
-  const isAnimation=next==='animations',isPhrases=next==='phrases';
+  const isAnimation=next==='animations',isPhrases=next==='phrases',isListening=next==='listening';
+  if(!isListening) listening.leave();
   const layout=document.querySelector('.layout');
-  layout.classList.toggle('animation-mode',isAnimation||isPhrases);
+  layout.classList.toggle('animation-mode',isAnimation||isPhrases||isListening);
+  layout.classList.toggle('listening-mode',isListening);
+  $('listening-view').setAttribute('aria-pressed',String(isListening));
+  $('listening-lab').hidden=!isListening;
   layout.classList.toggle('phrase-mode',isPhrases);
   $('animation-view').setAttribute('aria-pressed',String(isAnimation));
   $('phrase-view').setAttribute('aria-pressed',String(isPhrases));
   $('house-view').setAttribute('aria-pressed',String(next==='house'));
   $('animation-catalog').hidden=!isAnimation;
   $('phrase-lab').hidden=!isPhrases;
-  $('view-title').textContent=isAnimation?'Animaciones del Ranger':isPhrases?'Frases en movimiento':'La casa en 3D';
-  $('view-description').textContent=isAnimation
+  $('view-title').textContent=isListening?'Listening Lab':isAnimation?'Animaciones del Ranger':isPhrases?'Frases en movimiento':'La casa en 3D';
+  $('view-description').textContent=isListening?'Escucha inglés y comprende lo que sucede en el mundo 3D.':isAnimation
     ?'Busca un verbo o elige una acción para que el Ranger la haga.'
     :isPhrases?'Aprende inglés con las animaciones reales del Ranger, en presente y pasado.'
     :'Abre un mueble, observa lo que hay dentro y practica verbos frasales.';
   history.replaceState(null,'',next==='house'?location.pathname+location.search:
-    next==='animations'?'#animaciones':'#frases');
+    next==='animations'?'#animaciones':isListening?'#escuchar':'#frases');
   renderStation();
-  if(isAnimation||isPhrases){
+  if(isAnimation||isPhrases||isListening){
     scene?.setStudio();
     if(isAnimation)renderAnimations();
+    else if(isListening)listening.enter();
     else nextPhrase();
   }else scene?.setRoom(roomId);
 }
@@ -378,6 +385,7 @@ $('animation-replay').addEventListener('click', () => playAnimation(selectedAnim
 $('animation-view').addEventListener('click', () => setExperience('animations'));
 $('house-view').addEventListener('click', () => setExperience('house'));
 $('phrase-view').addEventListener('click', () => setExperience('phrases'));
+$('listening-view').addEventListener('click', () => setExperience('listening'));
 
 $('close').addEventListener('click', close);
 $('explore').addEventListener('click', () => setMode('explore'));
@@ -408,3 +416,4 @@ try {
 }
 if (location.hash === '#animaciones') setExperience('animations');
 else if(location.hash === '#frases') setExperience('phrases');
+else if(location.hash === '#escuchar') setExperience('listening');

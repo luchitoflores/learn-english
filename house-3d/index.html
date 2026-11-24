@@ -18,6 +18,7 @@
         <p id="view-description">Abre un mueble, observa lo que hay dentro y practica verbos frasales.</p>
       </header>
       <nav class="rooms experience-controls" aria-label="Secciones de práctica">
+        <button id="listening-view" type="button" aria-pressed="false">🎧 Listening Lab</button>
         <button id="house-view" type="button" aria-pressed="true">Explorar la casa</button>
         <button id="animation-view" type="button" aria-pressed="false">Animaciones del Ranger</button>
         <button id="phrase-view" type="button" aria-pressed="false">Frases y tiempos verbales</button>
@@ -27,6 +28,21 @@
         <p id="scene-message" class="scene-message" role="status">Cargando personaje y modelos 3D…</p>
       </div>
       <nav id="stations" class="stations" aria-label="Muebles de la habitación"></nav>
+    </section>
+    <section id="listening-lab" class="study listening-lab" hidden aria-labelledby="listening-title">
+      <header class="study-head"><div><p class="eyebrow">ESCUCHA · OBSERVA · ACTÚA</p><h2 id="listening-title">Listening Lab</h2></div><span id="listening-score" class="phrase-score"></span></header>
+      <div class="modes listening-modes" aria-label="Tipo de ejercicio">
+        <button id="listen-watch" type="button" aria-pressed="true">Aprender</button>
+        <button id="listen-act" type="button" aria-pressed="false">Ejecutar orden</button>
+        <button id="listen-match" type="button" aria-pressed="false">Reconocer acción</button>
+      </div>
+      <p id="listening-instruction" class="phrase-explanation"></p>
+      <div class="listening-audio"><button id="listening-play" type="button">▶ Escuchar</button><button id="listening-slow" type="button">Lento</button><button id="listening-hint" type="button">Ver pista</button></div>
+      <p id="listening-transcript" lang="en" hidden></p>
+      <div id="listening-choices" class="listening-choices"></div>
+      <p id="listening-feedback" role="status" aria-live="polite" class="phrase-feedback"></p>
+      <button id="listening-next" type="button" class="phrase-next">Siguiente →</button>
+      <details><summary>Cómo practicar</summary><p>Primero escucha a velocidad natural. Usa la versión lenta o la pista solo si hace falta. En reconocer acción, reproduce las opciones y elige la que corresponde al audio. Los errores vuelven a aparecer en esta sesión.</p></details>
     </section>
     <section id="phrase-lab" class="study action-phrases" aria-labelledby="phrase-title" hidden>
       <header class="study-head">

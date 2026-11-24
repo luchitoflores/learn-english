@@ -48,3 +48,7 @@ Así, *put it in* exige destino de tipo contenedor; *put it back* exige ubicaci�
 - `/house-lab/`: mesa de vocabulario.
 - `/character-lab/`: editor de protagonista 2D.
 - Aventura Phaser clásica: se activa desde el menú sin cargarla antes.
+
+## Dirección prioritaria: comprensión auditiva visual (Listening Lab)
+El acceso #escuchar es el nuevo modo prioritario. La traducción no aparece antes de responder. Aprender: audio y movimiento; Ejecutar orden: seleccionar una acción visual y ejecutarla; Reconocer acción: escuchar una descripción y comparar animaciones. Velocidad natural (1) y lenta (.75); pista opcional; repetición de errores en sesión. El modo de gramática anterior se conserva separado. El saludo utiliza un segundo avatar Mage y distingue distancia cercana/lejana. 
+Pendiente: selección y personalización de avatares, diálogo real con turnos y voces, baile en pareja, interacciones coordinadas (entregar, recibir, seguir, señalar, llamar, pelea de videojuego), animaciones faltantes y sincronización, comandos secuenciales, repaso persistente y voces variadas. No simular que un clip de saludo representa hablar o bailar. Las órdenes de objetos deben validar acción + objeto + destino, y no solo seleccionar el sustantivo.

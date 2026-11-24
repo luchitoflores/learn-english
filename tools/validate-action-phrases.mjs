@@ -30,3 +30,16 @@ assert(main.includes("window.startWordQuestClassic=startClassic"),'The classic g
 const vite=fs.readFileSync('vite.config.js','utf8');
 assert(vite.includes("house-3d/index.html"),'3D HTML must be included as a Vite build entry');
 console.log('PASS Word Quest home navigation and',ACTION_SENTENCES.length,'Ranger movements with grammatical sentences');
+
+
+// The listening catalog must reference real available clips and distinct English tasks.
+const { LISTENING_ACTIONS } = await import('../house-3d/listening.js');
+assert(LISTENING_ACTIONS.length>=12);
+assert.equal(new Set(LISTENING_ACTIONS.map(a=>a.id)).size,LISTENING_ACTIONS.length);
+for(const a of LISTENING_ACTIONS){
+ assert(animationClips[a.motion.pack]?.includes(a.motion.clip),'Missing listening clip '+a.id);
+ for(const clip of [a.motion.start,a.motion.hold].filter(Boolean)) assert(animationClips[a.motion.pack].includes(clip),'Missing pose '+clip);
+ assert(a.command&&a.description&&a.translation&&a.icon);
+}
+assert.equal(LISTENING_ACTIONS.filter(a=>a.social).length,2);
+for(const id of ['listening-lab','listening-view','listening-play','listening-slow','listening-hint','listening-choices','listening-next']) assert(html.includes('id="'+id+'"'),'Missing listening control '+id);

@@ -14,12 +14,14 @@ const actions=[
  ['cheer','🙌','Cheer!','He is cheering.','¡Celebra!','Simulation','Cheering']
 ].map(([id,icon,command,description,translation,pack,clip,start,hold,distance,social])=>({id,icon,command,description,translation,motion:{pack,clip,start,hold,distance},social}));
 export const LISTENING_ACTIONS=actions;
+const descriptions={jump:'Él está saltando.',sit:'Él se está sentando.',lie:'Él se está acostando.','get-up':'Él se está levantando.',stand:'Él se está poniendo de pie.',walk:'Él está caminando hacia adelante.',run:'Él está corriendo.',back:'Él está retrocediendo.',wave:'Él está saludando con la mano a la otra persona.','wave-far':'Él está saludando con la mano a la persona que está lejos.',crouch:'Él se está agachando.',cheer:'Él está celebrando.'};
 const shuffle=items=>{const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;};
 export function initListening({getScene,ready,setBusy,speak}){
  const $=id=>document.getElementById(id);
  let mode='watch',current,choices=[],resolved=false,active=false,locked=false,score=0,total=0,seenAudio=false,missed=false;
  let deck=[],review=[];
  const sentence=()=>mode==='act'?current.command:current.description;
+ const translation=()=>mode==='act'?current.translation:descriptions[current.id];
  function play(rate=1){
    if(!current)return;
    seenAudio=speak(sentence(),rate);
@@ -27,7 +29,7 @@ export function initListening({getScene,ready,setBusy,speak}){
    sync();
  }
  function sync(){
-   $('listening-score').textContent=score+' / '+total+' sin errores';
+   $('listening-score').textContent=mode==='watch'?total+' acciones exploradas':score+' / '+total+' sin errores';
    $('listening-next').disabled=locked||!resolved;
    $('listening-choices').querySelectorAll('button').forEach(b=>b.disabled=locked||!seenAudio||resolved);
  }
@@ -51,7 +53,7 @@ export function initListening({getScene,ready,setBusy,speak}){
      $('listening-feedback').textContent='Escucha otra vez y prueba otra acción.';return;}
    if(!await animate(entry))return;
    resolved=true;total++;if(!missed)score++;card.classList.add('correct');reveal();
-   $('listening-feedback').textContent='✓ '+current.translation;play();sync();
+   $('listening-feedback').textContent='✓ '+translation();play();sync();
  }
  function render(){
    $('listening-transcript').hidden=true;$('listening-transcript').textContent='';
@@ -73,7 +75,8 @@ export function initListening({getScene,ready,setBusy,speak}){
    if(locked)return;
    getScene()?.hidePartner();
    if(!deck.length)deck=shuffle(actions);
-   let candidate=review.length&&Math.random()<.5?review.shift():deck.shift();
+   const reviewIndex=review.findIndex(a=>a!==current);
+   let candidate=reviewIndex>=0?review.splice(reviewIndex,1)[0]:deck.shift();
    if(candidate===current&&deck.length){deck.push(candidate);candidate=deck.shift();}
    current=candidate;resolved=false;seenAudio=false;missed=false;
    choices=shuffle([current,...shuffle(actions.filter(a=>a!==current)).slice(0,3)]);
@@ -83,7 +86,8 @@ export function initListening({getScene,ready,setBusy,speak}){
    if(locked||!active)return;
    play(rate);
    if(mode==='watch'&&seenAudio&&await animate(current)){
-     resolved=true;reveal();$('listening-feedback').textContent=current.translation;sync();
+     if(!resolved)total++;
+     resolved=true;reveal();$('listening-feedback').textContent=translation();sync();
    }
  }
  function changeMode(nextMode){if(locked)return;mode=nextMode;deck=[];review=[];score=0;total=0;

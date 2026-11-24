@@ -236,3 +236,33 @@
 .top-house-link{display:flex;align-items:center;justify-content:center;border:1px solid #e8c184;background:#e4bd81;color:#26374c;border-radius:12px;min-height:39px;padding:9px 12px;font-size:12px;font-weight:850;white-space:nowrap}
 .top-house-link:hover,.top-house-link:focus-visible{background:#ffe1a8}
 @media(max-width:760px){.top-house-link{padding:7px 8px;font-size:10px;white-space:normal;max-width:105px;text-align:center}}
+
+
+/* Main Word Quest mode-select menu; the Phaser adventure is lazy-booted. */
+[hidden]{display:none!important}
+.wq-home{min-height:100dvh;padding:24px 18px 42px;background:radial-gradient(ellipse at 20% 0%,#414c6b 0,#19263e 42%,#11182c 100%);color:#fff3dc}
+.wq-home-inner{max-width:1180px;margin:auto}
+.wq-home-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:20px}
+.wq-home-brand{font-weight:900;font-size:20px;letter-spacing:1.6px;color:#ffe5b0}.wq-home-brand small{font-size:10px;font-weight:650;color:#b9c6d8;letter-spacing:2px}
+.wq-home-edition{font-size:11px;font-weight:800;color:#bfcce0;letter-spacing:1.5px}
+.wq-home-intro{min-height:260px;display:flex;align-items:stretch;justify-content:space-between;gap:14px;margin-bottom:20px;border:1px solid #edc78e63;border-radius:26px;padding:30px 38px 0;background:linear-gradient(125deg,#38516e,#34415c 45%,#6b5b5c);overflow:hidden;box-shadow:0 15px 50px #050a1966}
+.wq-home-copy{align-self:center;padding-bottom:30px;max-width:660px;z-index:1}
+.wq-home-overline{font-weight:900;color:#fbd493;font-size:11px;letter-spacing:2px}
+.wq-home-intro h1{font-size:clamp(26px,4.2vw,52px);letter-spacing:-.8px;line-height:1.1;margin:13px 0;font-weight:850}
+.wq-home-intro h1 em{color:#ffdea6;font-style:normal}
+.wq-home-intro p{font-size:14px;line-height:1.55;color:#d8e3f2;max-width:600px;margin:0}
+.wq-home-hero{width:min(32%,240px);min-width:120px;height:250px;align-self:flex-end;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 7px 15px #0e19346b)}
+.wq-home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.wq-home-card{font:inherit;display:flex;text-decoration:none;text-align:left;gap:13px;align-items:flex-start;min-height:165px;padding:22px 17px;border-radius:20px;border:1px solid #e6d1ad68;background:linear-gradient(165deg,#263750,#202c44);color:#fff4e5;box-shadow:0 5px 0 #101729;cursor:pointer;transition:transform .18s,background .18s}
+.wq-home-card:hover,.wq-home-card:focus-visible{transform:translateY(-3px);background:linear-gradient(165deg,#36516d,#263c5a);border-color:#f5d49e}
+.wq-home-card.featured{border-color:#e6c590;background:linear-gradient(160deg,#425071,#303f60)}
+.wq-home-icon{font-size:34px;flex:none;width:54px;height:54px;display:grid;place-items:center;border-radius:15px;background:#ffffff18}
+.wq-home-card-body{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.wq-home-card-body strong{font-size:18px;line-height:1.18}
+.wq-home-card-body small{font-size:12px;line-height:1.45;font-weight:500;color:#ccd6e4}
+.wq-home-card-body>span{font-size:12px;color:#ffdda0;font-weight:850;margin-top:auto}
+.wq-home-note{font-size:12px;line-height:1.6;color:#aebbcb;text-align:center;margin-top:22px}
+@media(max-width:900px){.wq-home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wq-home-intro{padding:24px 24px 0}.wq-home-card{min-height:150px}}
+@media(max-width:590px){.wq-home{padding:12px 9px 30px}.wq-home-top{padding:5px 7px 15px}.wq-home-brand{font-size:15px}.wq-home-brand small{display:block;font-size:8px;margin:2px 0}.wq-home-edition{font-size:8px;max-width:100px;text-align:right}
+.wq-home-intro{padding:21px 16px 0;min-height:213px;border-radius:19px;gap:0}.wq-home-copy{padding-bottom:19px}.wq-home-intro h1{font-size:25px}.wq-home-intro p{font-size:11px}.wq-home-overline{font-size:9px}.wq-home-hero{min-width:0;width:30%;height:176px}
+.wq-home-grid{gap:9px}.wq-home-card{padding:13px 9px;border-radius:15px;min-height:170px;display:flex;flex-direction:column;gap:7px}.wq-home-icon{width:39px;height:39px;font-size:27px;border-radius:11px}.wq-home-card-body{gap:6px}.wq-home-card-body strong{font-size:14px}.wq-home-card-body small{font-size:10px}.wq-home-card-body>span{font-size:10px}}

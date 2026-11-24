@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="/assets/hero/idle.png">
+  <link rel="icon" href="../assets/hero/idle.png">
   <title>La casa en 3D · Word Quest</title>
 </head>
 <body>
@@ -20,12 +20,27 @@
       <nav class="rooms experience-controls" aria-label="Secciones de práctica">
         <button id="house-view" type="button" aria-pressed="true">Explorar la casa</button>
         <button id="animation-view" type="button" aria-pressed="false">Animaciones del Ranger</button>
+        <button id="phrase-view" type="button" aria-pressed="false">Frases y tiempos verbales</button>
       </nav>
       <nav id="rooms" class="rooms" aria-label="Habitaciones"></nav>
       <div class="viewport" id="viewport" aria-label="Escena tridimensional de la habitación">
         <p id="scene-message" class="scene-message" role="status">Cargando personaje y modelos 3D…</p>
       </div>
       <nav id="stations" class="stations" aria-label="Muebles de la habitación"></nav>
+    </section>
+    <section id="phrase-lab" class="study action-phrases" aria-labelledby="phrase-title" hidden>
+      <header class="study-head">
+        <div><p class="eyebrow">ACTION LAB · INGLÉS EN MOVIMIENTO</p><h2 id="phrase-title">Frases y tiempos verbales</h2></div>
+        <span class="phrase-score" id="phrase-score">0 correctas</span>
+      </header>
+      <p class="phrase-explanation">Mira la animación del Ranger, interpreta la frase en español y elige cuál es su equivalente natural en inglés. La pista temporal permite practicar presente y pasado.</p>
+      <div class="phrase-cue"><span id="phrase-time">RIGHT NOW · AHORA</span><strong id="phrase-spanish">Él se está levantando.</strong><small id="phrase-grammar">Present continuous</small></div>
+      <div class="phrase-sound"><button id="phrase-audio" type="button">♫ Escuchar frase</button><button id="phrase-watch" type="button">↻ Repetir movimiento</button></div>
+      <div id="phrase-choices" class="phrase-choices" role="group" aria-label="Cuatro frases posibles"></div>
+      <p id="phrase-feedback" class="phrase-feedback" role="status" aria-live="polite">Observa el movimiento y elige la oración.</p>
+      <div id="phrase-grammar-note" class="phrase-grammar-note" hidden></div>
+      <button id="phrase-next" type="button" class="phrase-next">Otra acción →</button>
+      <details class="phrase-families"><summary>Guía: GET, PUT y LOOK — diferencias reales</summary><div id="phrase-family-content"></div></details>
     </section>
     <section class="study animation-catalog" id="animation-catalog" aria-labelledby="animation-title" hidden>
       <header class="study-head">

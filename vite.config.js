@@ -1,15 +1,16 @@
 import { defineConfig } from 'vite';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
+// Multi-page static app: the classic Phaser game and the Ranger 3D laboratory.
+// Keep the base relative so both pages work under GitHub Pages /learn-english/.
 export default defineConfig({
-  optimizeDeps: { entries: ['index.html', 'house-3d/index.html'] },
-  server: { watch: { ignored: ['**/public/assets', '**/public/assets/**'] } },
+  base: './',
   build: {
     rollupOptions: {
       input: {
-        main: fileURLToPath(new URL('./index.html', import.meta.url)),
-        house3d: fileURLToPath(new URL('./house-3d/index.html', import.meta.url)),
-      },
-    },
-  },
+        main: resolve(process.cwd(), 'index.html'),
+        house3d: resolve(process.cwd(), 'house-3d/index.html')
+      }
+    }
+  }
 });

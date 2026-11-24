@@ -19,6 +19,13 @@ try {
   page.on('pageerror',error=>errors.push(error.message));
   page.on('requestfailed',r=>{if(r.url().includes('127.0.0.1'))errors.push(r.url()+': '+r.failure()?.errorText)});
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:25000});
+  assert(await page.locator('#home-menu').isVisible(),'Main mode-selection menu must appear before the Phaser game');
+  assert.equal(await page.locator('#home-menu .wq-home-card').count(),6,'Six home modes should be selectable');
+  assert(!(await page.evaluate(()=>Boolean(window.wordQuest))),'Phaser should not boot behind the main menu');
+  assert(await page.locator('#home-menu a[href="./house-3d/#frases"]').isVisible(),
+    'Ranger language mode must be available on the home screen');
+  await page.locator('#home-menu').screenshot({path:artifacts+'/main-menu-mobile.png'});
+  await page.locator('#start-classic').click();
   await page.waitForFunction(()=>Boolean(window.wordQuest?.scene?.hero?.active && window.wordQuest?.scene?.backgroundArt?.active),null,{timeout:30000});
   await page.waitForTimeout(650);
   const state=await page.evaluate(()=>({
@@ -188,6 +195,26 @@ try {
   assert(await page.locator('#vocab-grid button[data-word="whisk"]').count()||await page.locator('#vocab-grid button').count()>0,
     'Cutlery exercise has no items');
   await page.locator('#lab-screen').screenshot({path:artifacts+'/house-cutlery-mobile.png'});
+  // The actual 3D language mode is accessible by direct link from the home menu.
+  await page.goto('http://127.0.0.1:4173/house-3d/#frases',{waitUntil:'domcontentloaded',timeout:30000});
+  await page.waitForFunction(()=>!document.querySelector('#phrase-lab')?.hidden,{timeout:18000});
+  assert(await page.locator('#phrase-view').getAttribute('aria-pressed')==='true',
+    'Phrasal verb action mode must open from the home menu');
+  assert.equal(await page.locator('#phrase-choices button').count(),4,
+    'The Ranger exercise must present four English sentences');
+  assert((await page.locator('#phrase-time').textContent()).includes('AHORA')||
+    (await page.locator('#phrase-time').textContent()).includes('AYER'),
+    'Verb tense must be grounded in a temporal cue');
+  await page.locator('#phrase-lab').screenshot({path:artifacts+'/ranger-phrases-mobile.png'});
+  // Do not treat WebGL preview failures as correct answers: click the actual correct sentence.
+  await page.waitForFunction(()=>!document.querySelector('#phrase-choices button')?.disabled,{timeout:30000});
+  await page.locator('#phrase-choices button[data-correct="true"]').click();
+  assert((await page.locator('#phrase-feedback').textContent()).includes('✓'),
+    'Correct sentence must produce feedback');
+  assert(await page.locator('#phrase-grammar-note').isVisible(),
+    'A phrasal verb explanation must appear when the answer is correct');
+  assert(await page.locator('#phrase-family-content').textContent().then(t=>t.includes('put it away')),
+    'PUT/GET/LOOK semantic guide is missing');
   assert.equal(errors.length,0,'Browser asset or JavaScript errors: '+errors.join(' | '));
   console.log('PASS mobile browser smoke:',state,'next:',next,'canvas colors:',distinct.size);
 } catch(e){ console.error('FAIL browser smoke:',e);process.exitCode=1; }

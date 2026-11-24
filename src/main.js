@@ -294,6 +294,25 @@ class GameApp {
     }catch(e){$('editor-message').textContent=`✕ ${e.message}`}
   }
 }
-try{const app=new GameApp();window.wordQuest=app}catch(error){
- console.error(error);document.querySelector('#app').innerHTML=`<p style="padding:40px;color:#ffdaaa">No se pudo iniciar Word Quest: ${String(error.message).replaceAll('<','&lt;')}. Comprueba que has instalado las dependencias con npm install.</p>`;
+// The main menu does not start Phaser until the player chooses the original adventure.
+// This prevents the game canvas from consuming memory behind the six-mode home screen.
+const home=document.getElementById('home-menu');
+const gameRoot=document.getElementById('app');
+if(home&&gameRoot){
+  gameRoot.hidden=true;
 }
+function startClassic(){
+  if(home){home.hidden=true;}
+  if(gameRoot){gameRoot.hidden=false;}
+  if(window.wordQuest)return;
+  try{
+    const app=new GameApp();
+    window.wordQuest=app;
+  }catch(error){
+    console.error(error);
+    gameRoot.innerHTML=`<p style="padding:40px;color:#ffdaaa">No se pudo iniciar Word Quest: ${String(error.message).replaceAll('<','&lt;')}. Comprueba que has instalado las dependencias con npm install.</p>`;
+  }
+}
+document.getElementById('start-classic')?.addEventListener('click',startClassic);
+window.startWordQuestClassic=startClassic;
+if(!home)startClassic();

@@ -176,3 +176,31 @@ button[aria-pressed="true"], .study .modes button[aria-pressed="true"], #next {
   .viewport { height: clamp(18rem, 65vw, 31rem); }
   .in-station .study { margin: -0.75rem 0.4rem 0; z-index: 1; }
 }
+
+
+/* Ranger language quiz: show its panel while keeping the house inventory hidden. */
+.animation-mode.phrase-mode .study.action-phrases{display:block}
+.animation-mode.phrase-mode .study.animation-catalog{display:none}
+.phrase-explanation{font-size:.86rem;line-height:1.5;color:var(--muted);margin:.3rem 0 1rem}
+.phrase-score{font-size:.78rem;color:var(--green);font-weight:850;white-space:nowrap}
+.phrase-cue{display:flex;flex-direction:column;gap:.38rem;padding:1rem;background:linear-gradient(150deg,#e0ecdf,#f0f4e7);border:1px solid #b1d4be;border-radius:.75rem}
+.phrase-cue>span{font-size:.73rem;letter-spacing:.08em;font-weight:850;color:#417b58}
+.phrase-cue strong{font-size:clamp(1.12rem,2.1vw,1.55rem);line-height:1.3}
+.phrase-cue small{color:var(--muted)}
+.phrase-sound{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+.study .phrase-sound button{flex:1;min-height:2.55rem;border-color:#acc1b5;background:#edf4e9}
+.phrase-choices{display:grid;grid-template-columns:1fr;gap:.5rem}
+.study .phrase-choices button{width:100%;text-align:left;min-height:3.3rem;padding:.7rem .85rem;font-weight:700;color:#29433b;background:#fffdf5;line-height:1.32}
+.study .phrase-choices button:hover,.study .phrase-choices button:focus-visible{border-color:#4b886b;background:#e8f3e7}
+.study .phrase-choices button.correct{background:#d0eedb;border:2px solid #3d9c68;color:#195632}
+.study .phrase-choices button.incorrect{background:#ffe5dc;border-color:#b85e56}
+.phrase-feedback{min-height:2rem;color:var(--green);line-height:1.5;font-size:.84rem}
+.phrase-grammar-note{padding:.75rem;border-radius:.6rem;background:#f2e8c8;color:#564b32;font-size:.83rem;line-height:1.5;margin:.5rem 0}
+.study .phrase-next{width:100%;margin-top:.6rem;min-height:3rem;color:#fff!important;background:#245645!important;border-color:#245645!important}
+.phrase-families{margin-top:1.1rem;border-top:1px solid var(--line);padding-top:.9rem;font-size:.83rem}
+.phrase-families summary{font-weight:800;color:#285742;cursor:pointer}
+.phrase-families h3{font-size:.9rem;color:#214c3d;margin:1rem 0 .4rem}
+.phrase-families dl{margin:0}.phrase-families dt{font-weight:800;margin-top:.48rem;color:#213c32}
+.phrase-families dd{margin:.08rem 0 .4rem;font-size:.8rem;line-height:1.4;color:#576860}
+@media(max-width:860px){.animation-mode.phrase-mode .action-phrases{margin:0 .3rem 1rem}.phrase-choices{grid-template-columns:1fr 1fr}.study .phrase-choices button{font-size:.78rem;min-height:3.8rem}}
+@media(max-width:480px){.phrase-choices{grid-template-columns:1fr}.study .phrase-choices button{min-height:2.9rem}}

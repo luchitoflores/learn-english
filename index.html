@@ -2,12 +2,33 @@
 <html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <meta name="theme-color" content="#1b2034"/><meta name="description" content="Word Quest: aprende inglés con un personaje en habitaciones 2D interactivas."/>
 <title>Word Quest · Living English</title></head><body>
+<div id="home-menu" class="wq-home" role="main" aria-labelledby="home-title">
+  <div class="wq-home-inner">
+    <header class="wq-home-top"><span class="wq-home-brand">✦ WORD QUEST <small> LIVING ENGLISH</small></span><span class="wq-home-edition">ELIGE CÓMO APRENDER</span></header>
+    <div class="wq-home-intro">
+      <div class="wq-home-copy"><span class="wq-home-overline">APRENDE INGLÉS JUGANDO</span>
+        <h1 id="home-title">Un mundo de palabras.<br><em>Muchas formas de aprender.</em></h1>
+        <p>Explora objetos de la casa, escucha frases, escribe dictados y descubre cómo se expresan los movimientos con un personaje 3D.</p>
+      </div>
+      <img class="wq-home-hero" src="./assets/hero/front-beard.png" alt="Protagonista de Word Quest"/>
+    </div>
+    <nav class="wq-home-grid" aria-label="Modos de Word Quest">
+      <a class="wq-home-card featured" href="./house-3d/#animaciones"><span class="wq-home-icon">🏃</span><span class="wq-home-card-body"><strong>Action Lab 3D</strong><small>Ranger animado · Mira cómo se mueve y escucha el verbo</small><span>Explorar movimientos →</span></span></a>
+      <a class="wq-home-card featured" href="./house-3d/#frases"><span class="wq-home-icon">💬</span><span class="wq-home-card-body"><strong>Frases y phrasal verbs</strong><small>Acciones del Ranger, expresiones naturales y tiempos verbales</small><span>Practicar oraciones →</span></span></a>
+      <a class="wq-home-card" href="./house-lab/"><span class="wq-home-icon">🧰</span><span class="wq-home-card-body"><strong>House Lab</strong><small>Vocabulario de cocina, herramientas, baño, ropa y dictados</small><span>Abrir mesa de objetos →</span></span></a>
+      <a class="wq-home-card" href="./house-3d/"><span class="wq-home-icon">🏠</span><span class="wq-home-card-body"><strong>Casa 3D</strong><small>Abre muebles, reconoce objetos y prueba interacciones</small><span>Entrar a la casa →</span></span></a>
+      <button class="wq-home-card" id="start-classic" type="button"><span class="wq-home-icon">🎮</span><span class="wq-home-card-body"><strong>Aventura 2D</strong><small>El juego original: caminar, habitaciones, misiones e inventarios</small><span>Jugar aventura →</span></span></button>
+      <a class="wq-home-card" href="./character-lab/"><span class="wq-home-icon">🧔</span><span class="wq-home-card-body"><strong>Personaje 2D</strong><small>Editor de apariencia del explorador de cabello plateado</small><span>Editar personaje →</span></span></a>
+    </nav>
+    <p class="wq-home-note">Los modos son experimentales y tienen distinto nivel de desarrollo. Las animaciones 3D disponibles usan el Ranger de KayKit.</p>
+  </div>
+</div>
 <div id="app">
   <header class="topbar">
     <div class="brand"><span class="brand-symbol">✦</span><div><strong>WORD QUEST</strong><small>LIVING ENGLISH · ALPHA 0.1</small></div></div>
     <div class="room-info"><small id="room-en">BEDROOM</small><strong id="room-name">Dormitorio</strong></div>
     <div class="progress"><span id="xp">0 XP</span><span class="progress-dot">●</span><span id="mastered">0 descubiertas</span></div>
-    <div class="top-actions"><a class="top-house-link" href="./house-3d/">Casa en 3D</a><a class="top-house-link" href="./house-lab/" title="Explorar los objetos de la casa sin caminar">▦ Mesa de objetos</a><button id="repeat" title="Repetir pronunciación">♫ <span>Repetir</span></button><button id="reset" title="Restablecer habitación">↻</button><button id="map" class="primary">⌂ <span>Mapa</span></button></div>
+    <div class="top-actions"><a class="top-house-link" href="./" title="Volver al menú de modos">⌂ Menú</a><a class="top-house-link" href="./house-3d/">Casa en 3D</a><a class="top-house-link" href="./house-lab/" title="Explorar los objetos de la casa sin caminar">▦ Mesa de objetos</a><button id="repeat" title="Repetir pronunciación">♫ <span>Repetir</span></button><button id="reset" title="Restablecer habitación">↻</button><button id="map" class="primary">⌂ <span>Mapa</span></button></div>
   </header>
   <main class="game-layout">
     <section class="stage-shell" id="stage-shell">

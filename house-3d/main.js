@@ -1,6 +1,7 @@
 import { speak } from '../src/core/audio.js';
 import { rooms, stations, makePhrase, openingPhrase, practiceMotions } from './data.js';
 import { animationClips } from './animation-clips.js';
+import { ACTION_SENTENCES, PHRASAL_FAMILIES, actionExercise } from './action-phrases.js';
 import { HouseScene } from './scene.js';
 import './style.css';
 
@@ -24,7 +25,8 @@ let phrase;
 let task;
 let previousTask;
 let solved = false;
-let animationMode = false;
+let experience = 'house';
+let phraseQuestion = null, phraseResolved = false, phraseScore = 0, phraseCount = 0;
 let selectedAnimation;
 let characterReady;
 
@@ -256,28 +258,115 @@ async function playAnimation(motion) {
   }
 }
 
-function setExperience(showAnimations) {
-  if (busy || animationMode === showAnimations) return;
-  animationMode = showAnimations;
-  stationId = undefined;
-  const layout = document.querySelector('.layout');
-  layout.classList.toggle('animation-mode', showAnimations);
-  $('animation-view').setAttribute('aria-pressed', String(showAnimations));
-  $('house-view').setAttribute('aria-pressed', String(!showAnimations));
-  $('animation-catalog').hidden = !showAnimations;
-  $('view-title').textContent = showAnimations ? 'Animaciones del Ranger' : 'La casa en 3D';
-  $('view-description').textContent = showAnimations
-    ? 'Busca un verbo o elige una acción para que el Ranger la haga.'
-    : 'Abre un mueble, observa lo que hay dentro y practica verbos frasales.';
-  history.replaceState(null, '', showAnimations ? '#animaciones' : location.pathname + location.search);
-  renderStation();
-  if (showAnimations) {
-    scene?.setStudio();
-    renderAnimations();
-  } else {
-    scene?.setRoom(roomId);
-  }
+function renderFamilies(){
+  const root=$('phrase-family-content');
+  root.replaceChildren(...PHRASAL_FAMILIES.map(family=>{
+    const section=document.createElement('section');
+    const heading=document.createElement('h3');heading.textContent=family.base;
+    const list=document.createElement('dl');
+    for(const [english,spanish,context] of family.words){
+      const dt=document.createElement('dt');dt.textContent=english;
+      const dd=document.createElement('dd');dd.textContent=spanish+' · '+context;
+      list.append(dt,dd);
+    }
+    section.append(heading,list);
+    return section;
+  }));
 }
+const mix=items=>[...items].sort(()=>Math.random()-.5);
+async function playPhraseMotion(){
+  if(!phraseQuestion||!scene)return;
+  try{
+    setBusy(true);
+    await characterReady;
+    await scene.previewMotion(phraseQuestion.exercise.motion);
+  }catch(error){
+    console.error(error);
+    $('phrase-feedback').textContent='El movimiento no pudo reproducirse. Puedes seguir con la frase.';
+  }finally{setBusy(false);}
+}
+function renderPhraseQuestion(){
+  if(!phraseQuestion)return;
+  const {exercise,options}=phraseQuestion;
+  $('phrase-time').textContent=exercise.time;
+  $('phrase-spanish').textContent=exercise.spanish;
+  $('phrase-grammar').textContent=exercise.tense;
+  $('phrase-score').textContent=phraseScore+' correctas · '+phraseCount+' preguntas';
+  $('phrase-feedback').textContent='Mira el movimiento y elige la oración correcta.';
+  $('phrase-grammar-note').hidden=true;
+  $('phrase-next').disabled=false;
+  $('phrase-choices').replaceChildren(...options.map(option=>{
+    const btn=button(option.phrase,()=>answerPhrase(option,btn));
+    btn.dataset.answer=option.entry.key;
+    btn.dataset.correct=String(option===phraseQuestion.correct);
+    return btn;
+  }));
+}
+function nextPhrase(){
+  const previous=phraseQuestion?.entry.key;
+  const candidates=ACTION_SENTENCES.filter(entry=>entry.key!==previous);
+  const entry=candidates[Math.floor(Math.random()*candidates.length)]||ACTION_SENTENCES[0];
+  const tense=Math.random()<.5?'present':'past';
+  const correct={entry,phrase:actionExercise(entry,tense).phrase};
+  const others=mix(ACTION_SENTENCES.filter(e=>e!==entry)).slice(0,3)
+    .map(e=>({entry:e,phrase:actionExercise(e,tense).phrase}));
+  phraseQuestion={entry,exercise:actionExercise(entry,tense),correct,options:mix([correct,...others])};
+  phraseResolved=false;phraseCount++;
+  renderPhraseQuestion();
+  playPhraseMotion();
+}
+function answerPhrase(option,control){
+  if(phraseResolved||!phraseQuestion||busy)return;
+  const correct=option===phraseQuestion.correct;
+  if(!correct){
+    control.classList.add('incorrect');
+    $('phrase-feedback').textContent='Esa frase representa otra acción. Mira el movimiento y prueba de nuevo.';
+    return;
+  }
+  phraseResolved=true;phraseScore++;
+  $('phrase-score').textContent=phraseScore+' correctas · '+phraseCount+' preguntas';
+  const {entry,exercise}=phraseQuestion;
+  $('phrase-feedback').textContent='✓ '+exercise.phrase+' — '+exercise.spanish;
+  $('phrase-grammar-note').hidden=false;
+  $('phrase-grammar-note').textContent=entry.hint+' · '+exercise.tense;
+  for(const btn of $('phrase-choices').querySelectorAll('button')){
+    btn.disabled=true;
+    if(btn.dataset.correct==='true')btn.classList.add('correct');
+  }
+  speak(exercise.phrase);
+  try{localStorage.setItem('wq-action-phrases-score',JSON.stringify({score:phraseScore,questions:phraseCount}))}catch{}
+}
+function setExperience(next) {
+  if(busy || experience===next)return;
+  experience=next;
+  stationId=undefined;
+  const isAnimation=next==='animations',isPhrases=next==='phrases';
+  const layout=document.querySelector('.layout');
+  layout.classList.toggle('animation-mode',isAnimation||isPhrases);
+  layout.classList.toggle('phrase-mode',isPhrases);
+  $('animation-view').setAttribute('aria-pressed',String(isAnimation));
+  $('phrase-view').setAttribute('aria-pressed',String(isPhrases));
+  $('house-view').setAttribute('aria-pressed',String(next==='house'));
+  $('animation-catalog').hidden=!isAnimation;
+  $('phrase-lab').hidden=!isPhrases;
+  $('view-title').textContent=isAnimation?'Animaciones del Ranger':isPhrases?'Frases en movimiento':'La casa en 3D';
+  $('view-description').textContent=isAnimation
+    ?'Busca un verbo o elige una acción para que el Ranger la haga.'
+    :isPhrases?'Aprende inglés con las animaciones reales del Ranger, en presente y pasado.'
+    :'Abre un mueble, observa lo que hay dentro y practica verbos frasales.';
+  history.replaceState(null,'',next==='house'?location.pathname+location.search:
+    next==='animations'?'#animaciones':'#frases');
+  renderStation();
+  if(isAnimation||isPhrases){
+    scene?.setStudio();
+    if(isAnimation)renderAnimations();
+    else nextPhrase();
+  }else scene?.setRoom(roomId);
+}
+renderFamilies();
+$('phrase-next').addEventListener('click',nextPhrase);
+$('phrase-audio').addEventListener('click',()=>phraseQuestion&&speak(phraseQuestion.exercise.phrase));
+$('phrase-watch').addEventListener('click',playPhraseMotion);
 
 $('animation-category').add(new Option('Todas las categorías', ''));
 for (const [id, label] of Object.entries(categories)) {
@@ -286,8 +375,9 @@ for (const [id, label] of Object.entries(categories)) {
 $('animation-search').addEventListener('input', renderAnimations);
 $('animation-category').addEventListener('change', renderAnimations);
 $('animation-replay').addEventListener('click', () => playAnimation(selectedAnimation));
-$('animation-view').addEventListener('click', () => setExperience(true));
-$('house-view').addEventListener('click', () => setExperience(false));
+$('animation-view').addEventListener('click', () => setExperience('animations'));
+$('house-view').addEventListener('click', () => setExperience('house'));
+$('phrase-view').addEventListener('click', () => setExperience('phrases'));
 
 $('close').addEventListener('click', close);
 $('explore').addEventListener('click', () => setMode('explore'));
@@ -316,4 +406,5 @@ try {
   console.error(error);
   $('scene-message').textContent = 'WebGL no está disponible. Puedes practicar con el inventario de cada mueble.';
 }
-if (location.hash === '#animaciones') setExperience(true);
+if (location.hash === '#animaciones') setExperience('animations');
+else if(location.hash === '#frases') setExperience('phrases');
